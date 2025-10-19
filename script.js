@@ -417,6 +417,19 @@
 
     // ----- toolbar buttons -----
     const tools = document.querySelectorAll('.tool');
+
+    // ---- 1️⃣  Make *sand* the default tool -----------------
+    // (ID 1, the first button after the HTML comment)
+    activeTool = 1;                         // internal state
+    tools.forEach(b => b.classList.remove('active')); // clear any leftovers
+    const sandBtn = Array.from(tools).find(b => parseInt(b.dataset.id) === 1);
+    if (sandBtn) {
+      sandBtn.classList.add('active');
+      sandBtn.setAttribute('aria-pressed', 'true');
+    }
+    // -------------------------------------------------------
+
+    // Click‑handler for any tool (keeps the UI in sync)
     tools.forEach(btn => {
       btn.addEventListener('click', function () {
         activeTool = parseInt(this.dataset.id);
