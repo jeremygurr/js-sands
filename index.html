@@ -12,15 +12,49 @@
   <canvas id="world"></canvas>
 
   <div id="toolbar">
-    <button class="tool" data-id="1" aria-label="Sand (S)" style="background-color:#C2B280;"></button>
-    <button class="tool" data-id="2" aria-label="Water (W)" style="background-color:#4A90E2;"></button>
-    <button class="tool" data-id="3" aria-label="Stone (R)" style="background-color:#555555;"></button>
-    <button class="tool" data-id="4" aria-label="Fire (F)" style="background-color:#FF4500;"></button>
-    <button class="tool" data-id="0" aria-label="Eraser (E)" style="background-color:#000000;"></button>
+    <!-- -------------- TOOLS -------------- -->
+    <button class="tool"
+            data-id="1"
+            aria-label="Sand (S)"
+            title="Sand – press **S**"
+            style="background-color:#C2B280;"></button>
 
-    <button id="pauseBtn" aria-label="Pause (Space)"></button>
-    <button id="clearBtn" aria-label="Clear (C)"></button>
+    <button class="tool"
+            data-id="2"
+            aria-label="Water (W)"
+            title="Water – press **W**"
+            style="background-color:#4A90E2;"></button>
 
+    <button class="tool"
+            data-id="3"
+            aria-label="Stone (R)"
+            title="Stone – press **R**"
+            style="background-color:#555555;"></button>
+
+    <button class="tool"
+            data-id="4"
+            aria-label="Fire (F)"
+            title="Fire – press **F**"
+            style="background-color:#FF4500;"></button>
+
+    <button class="tool"
+            data-id="0"
+            aria-label="Eraser (E)"
+            title="Eraser – press **E**"
+            style="background-color:#000000;"></button>
+
+    <!-- -------------- CONTROLS -------------- -->
+    <button id="pauseBtn"
+            aria-label="Pause (Space)"
+            title="Pause / Resume – press **Space**">
+    </button>
+
+    <button id="clearBtn"
+            aria-label="Clear (C)"
+            title="Clear the world – press **C**">
+    </button>
+
+    <!-- -------------- INFO -------------- -->
     <span id="fps">— FPS</span>
   </div>
 
