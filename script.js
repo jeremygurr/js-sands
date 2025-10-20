@@ -41,6 +41,7 @@
   let lastFpsUpdate = 0;
   let fps = 0;
   let paintDelay = 0;
+  let paintOn = false;
   let brushSize = 1;
 
   const PALETTE = [
@@ -138,6 +139,7 @@
     lifeGrid = newLifeGrid;
     momentum = newMomentum;
     paintDelay = 0;
+    paintOn = false;
     renderFrame();
   }
 
@@ -168,7 +170,9 @@
   // MOUSE / PAINTING
   // -----------------------------------------------------------
   function handleMousePainting() {
-    if (mouseDown) paintAt(mousePos.x, mousePos.y, activeTool);
+    if (paintOn) {
+      paintAt(mousePos.x, mousePos.y, activeTool);
+    }
   }
 
   function apply_swap(a, b) {
@@ -894,13 +898,29 @@
     // ----- mouse handling -----
     canvas.addEventListener('mousedown', e => {
       if (e.button !== 0) return;
-      mouseDown = true;
-      paintAt(e.offsetX, e.offsetY, activeTool);
+      if (activeTool == EMPTY) {
+        paintAt(e.offsetX, e.offsetY, EMPTY);
+        mouseDown = true;
+      } else {
+        if (paintOn) {
+          paintOn = false;
+        } else {
+          mouseDown = true;
+          paintOn = true;
+          mousePos = { x: e.offsetX, y: e.offsetY };
+        }
+      }
     });
 
     canvas.addEventListener('mousemove', e => {
-      if (mouseDown) paintAt(e.offsetX, e.offsetY, activeTool);
-      mousePos = { x: e.offsetX, y: e.offsetY };
+      if (mouseDown) {
+        if (activeTool == EMPTY) {
+          paintAt(e.offsetX, e.offsetY, EMPTY);
+        } else {
+          paintOn = true;
+          mousePos = { x: e.offsetX, y: e.offsetY };
+        }
+      }
     });
 
     window.addEventListener('mouseup', () => (mouseDown = false));
