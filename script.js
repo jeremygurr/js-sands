@@ -174,17 +174,17 @@
         const below = idx + widthCells;
         if (y < heightCells - 1) {
           if (grid[below] === EMPTY || grid[below] === WATER) {
-          // swap with empty or water below
-          // if (grid[below] == WATER && momentum[below] == 0) {
-          //   momentum
-          // }
-          swap(idx, below);
+            // swap with empty or water below
+            if (grid[below] == WATER && momentum[below] == 0) {
+              momentum[below] = randInt(3) - 1;
+            }
+            swap(idx, below);
           } else {
-          // try to move diagonally down left/right
-          const diag = [];
-          if (x > 0 && grid[below - 1] === EMPTY) diag.push(below - 1);
-          if (x < widthCells - 1 && grid[below + 1] === EMPTY) diag.push(below + 1);
-          swap_any(idx, diag);
+            // try to move diagonally down left/right
+            const diag = [];
+            if (x > 0 && grid[below - 1] === EMPTY) diag.push(below - 1);
+            if (x < widthCells - 1 && grid[below + 1] === EMPTY) diag.push(below + 1);
+            swap_any(idx, diag);
           }
         }
         break;
@@ -199,24 +199,24 @@
           // try diagonal moves
           const diag = [];
           if (y < heightCells - 1) {
-          if (x > 0 && grid[below - 1] === EMPTY) diag.push(below - 1);
-          if (x < widthCells - 1 && grid[below + 1] === EMPTY) diag.push(below + 1);
+            if (x > 0 && grid[below - 1] === EMPTY) diag.push(below - 1);
+            if (x < widthCells - 1 && grid[below + 1] === EMPTY) diag.push(below + 1);
           }
           if (diag.length) {
-          swap_any(idx, diag);
+            swap_any(idx, diag);
           } else {
-          const direction = Math.floor(Math.random() * 2);
-          if (direction == 0) {
-            if (x > 0 && grid[idx - 1] === EMPTY) swap(idx, idx - 1);
-          } else {
-            if (x < widthCells - 1 && grid[idx + 1] === EMPTY) swap(idx, idx + 1);
-          }
+            const direction = Math.floor(Math.random() * 2);
+            if (direction == 0) {
+              if (x > 0 && grid[idx - 1] === EMPTY) swap(idx, idx - 1);
+            } else {
+              if (x < widthCells - 1 && grid[idx + 1] === EMPTY) swap(idx, idx + 1);
+            }
           }
         }
         break;
-        }
+      }
 
-        case STONE: {              // ---- Stone ----
+      case STONE: {              // ---- Stone ----
         // Stone never moves – nothing to do
         break;
       }
@@ -231,10 +231,10 @@
         for (const nIdx of neighbours) {
           if (nIdx < 0 || nIdx >= grid.length) continue;
           if (grid[nIdx] === WATER) {
-          grid[idx] = STEAM;
-          grid[nIdx] = STEAM;
-          reacted = true;
-          break;
+            grid[idx] = STEAM;
+            grid[nIdx] = STEAM;
+            reacted = true;
+            break;
           }
         }
         if (reacted) break;
@@ -249,12 +249,12 @@
           if (x > 0 && grid[idx - 1] === EMPTY) side.push(idx - 1);
           if (x < widthCells - 1 && grid[idx + 1] === EMPTY) side.push(idx + 1);
           if (side.length) {
-          swap_any(idx, side);
+            swap_any(idx, side);
           } else {
-          const diag = [];
-          if (x > 0 && grid[fireBelow - 1] === EMPTY) diag.push(fireBelow - 1);
-          if (x < widthCells - 1 && grid[fireBelow + 1] === EMPTY) diag.push(fireBelow + 1);
-          swap_any(idx, diag);
+            const diag = [];
+            if (x > 0 && grid[fireBelow - 1] === EMPTY) diag.push(fireBelow - 1);
+            if (x < widthCells - 1 && grid[fireBelow + 1] === EMPTY) diag.push(fireBelow + 1);
+            swap_any(idx, diag);
           }
         }
         break;
@@ -267,14 +267,14 @@
         const above = idx - widthCells;
         if (above >= 0) {
           if (grid[above] === EMPTY) {
-          // rise straight up
-          swap(idx, above);
+            // rise straight up
+            swap(idx, above);
           } else {
-          // try diagonal moves
-          const diag = [];
-          if (x > 0 && grid[above - 1] === EMPTY) diag.push(above - 1);
-          if (x < widthCells - 1 && grid[above + 1] === EMPTY) diag.push(above + 1);
-          swap_any(idx, diag);
+            // try diagonal moves
+            const diag = [];
+            if (x > 0 && grid[above - 1] === EMPTY) diag.push(above - 1);
+            if (x < widthCells - 1 && grid[above + 1] === EMPTY) diag.push(above + 1);
+            swap_any(idx, diag);
           }
         } else {
           // try side moves
@@ -317,31 +317,6 @@
         updateParticlesInner(x, y)
       }
     }
-//     if (randInt(2) == 1) {
-//       for (let y = heightCells - 1; y >= 0; y--) {
-//         if (randInt(2) == 1) {
-//           for (let x = 0; x < widthCells; x++) {
-//             updateParticlesInner(x, y)
-//           }
-//         } else {
-//           for (let x = widthCells - 1; x >= 0; x--) {
-//             updateParticlesInner(x, y)
-//           }
-//         }
-//       }
-//     } else {
-//       for (let y = 0; y < heightCells; y++) {
-//         if (randInt(2) == 1) {
-//           for (let x = 0; x < widthCells; x++) {
-//             updateParticlesInner(x, y)
-//           }
-//         } else {
-//           for (let x = widthCells - 1; x >= 0; x--) {
-//             updateParticlesInner(x, y)
-//           }
-//         }
-//       }
-//     }
   }
 
   // -----------------------------------------------------------
