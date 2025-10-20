@@ -68,12 +68,30 @@
     return { x: clamp(x, 0, widthCells - 1), y: clamp(y, 0, heightCells - 1) };
   }
 
+  // tests if i is between min (inclusive) and max (exclusive)
+  function inBounds(i, min, max) {
+    return i >= min && i < max;
+  }
+
   function paintAt(px, py, typeId) {
     const { x, y } = getCellFromPixel(px, py);
     const idx = y * widthCells + x;
     if (idx < 0 || idx >= grid.length || paintDelay > 0) return;
     paintDelay = 3;
-    grid[idx] = typeId;
+    let i=idx
+    grid[i] = typeId;
+    if (brushSize > 1) {
+      i = idx - 2 - 2 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx + 2 + 2 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+    }
+    if (brushSize > 2) {
+      i = idx - 2 + 2 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx + 2 - 2 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+    }
   }
 
   function clearGrid() {
@@ -196,6 +214,28 @@
       index - widthCells - 1, index - widthCells, index - widthCells + 1,
       index - 1,                                  index + 1,
       index + widthCells - 1, index + widthCells, index + widthCells + 1,
+    ];
+    const map = new Map();
+
+    for (const nIdx of neighbours) {
+      if (nIdx < 0 || nIdx >= grid.length) continue;
+      const type = grid[nIdx];
+      let count = map.get(type) ?? 0;
+      map.set(type, count+1);
+    }
+
+    return map;
+  }
+
+  function get_neighbor_map2(i) {
+    const w  = widthCells
+    const w2 = widthCells * 2
+    const neighbours = [
+      i - w2 - 2, i - w2 - 1, i - w2, i - w2 + 1, i - w2 + 2,
+      i - w  - 2, i - w  - 1, i - w,  i - w  + 1, i - w  + 2,
+      i      - 2, i      - 1,         i      + 1, i      + 2,
+      i + w  - 2, i + w  - 1, i + w,  i + w  + 1, i + w  + 2,
+      i + w2 - 2, i + w2 - 1, i + w2, i + w2 + 1, i + w2 + 2,
     ];
     const map = new Map();
 
@@ -580,22 +620,90 @@
 
       case WOOD: {
 
-        const neighbours = [
-          idx - widthCells - 1, idx - widthCells, idx - widthCells + 1,
-          idx - 1,                                idx + 1,
-        ];
+        const up_left = idx - widthCells - 1;
+        const up = idx - widthCells;
+        const up_right = idx - widthCells + 1;
+
+        const down_left = idx + widthCells - 1;
+        const down = idx + widthCells;
+        const down_right = idx + widthCells + 1;
+
+        const left = idx - 1;
+        const right = idx + 1;
+        
+        const up_neighbours = [ up_left, up, up_right ];
+        const side_neighbours = [ left, right ];
         let reacted = false;
 
-        for (const nIdx of neighbours) {
+        for (const nIdx of up_neighbours) {
           if (nIdx < 0 || nIdx >= grid.length) continue;
           if (grid[nIdx] === WATER) {
-            let neighbor_map = get_neighbor_map(nIdx);
+            let neighbor_map = get_neighbor_map2(nIdx);
             let wood_count = neighbor_map.get(WOOD) ?? 0;
-            if (wood_count < 3 && Math.random() > 0.25) {
+
+            if (nIdx == up_left 
+               && inBounds(down_right, 0, grid.length) 
+               && grid[down_right] == WOOD
+               && wood_count < 6
+               && Math.random() > 0.5
+               ) {
               reacted = true;
               set_particle(nIdx, WOOD, delayed_actions);
               break;
-            } else if (Math.random() > 0.8) {
+            }
+
+            if (nIdx == up_right 
+               && inBounds(down_left, 0, grid.length) 
+               && grid[down_left] == WOOD
+               && wood_count < 6
+               && Math.random() > 0.5
+               ) {
+              reacted = true;
+              set_particle(nIdx, WOOD, delayed_actions);
+              break;
+            }
+
+            if (nIdx == up
+               && inBounds(down, 0, grid.length) 
+               && grid[down] == WOOD
+               && wood_count < 6
+               && Math.random() > 0.5
+               ) {
+              reacted = true;
+              set_particle(nIdx, WOOD, delayed_actions);
+              break;
+            }
+
+            if (wood_count < 3 && Math.random() > 0.5
+             || wood_count < 6 && Math.random() > 0.95
+               ) {
+              reacted = true;
+              set_particle(nIdx, WOOD, delayed_actions);
+              break;
+            } else if (Math.random() > 0.9) {
+              reacted = true;
+              set_particle(nIdx, EMPTY, delayed_actions);
+              break;
+            }
+          }
+        }
+
+        if (reacted) {
+          break;
+        }
+
+        for (const nIdx of side_neighbours) {
+          if (nIdx < 0 || nIdx >= grid.length) continue;
+          if (grid[nIdx] === WATER) {
+            let neighbor_map = get_neighbor_map2(nIdx);
+            let wood_count = neighbor_map.get(WOOD) ?? 0;
+            if (wood_count < 4 && Math.random() > 0.5
+             || wood_count < 7 && Math.random() > 0.95
+               ) {
+              reacted = true;
+              set_particle(nIdx, WOOD, delayed_actions);
+              break;
+            } else if (Math.random() > 0.9) {
               reacted = true;
               set_particle(nIdx, EMPTY, delayed_actions);
               break;
