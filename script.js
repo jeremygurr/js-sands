@@ -16,6 +16,10 @@
   const CLOUD1 = 5;
   const CLOUD2 = 6;
   const CLOUD3 = 7;
+  const WOOD = 8;
+
+  const ACTION_SET = 1;
+  const ACTION_SWAP = 2; 
 
   const canvas = document.getElementById('world');
   const ctx = canvas.getContext('2d');
@@ -36,6 +40,8 @@
   let frameCount = 0;
   let lastFpsUpdate = 0;
   let fps = 0;
+  let paintDelay = 0;
+  let brushSize = 1;
 
   const PALETTE = [
     [  0,   0,   0,   0], // EMPTY – transparent
@@ -46,6 +52,7 @@
     [204, 204, 255, 255], // CLOUD1
     [170, 170, 230, 255], // CLOUD2
     [140, 140, 200, 255], // CLOUD3
+    [124,  68,  58, 255], // WOOD
   ];
 
   // -----------------------------------------------------------
@@ -64,7 +71,8 @@
   function paintAt(px, py, typeId) {
     const { x, y } = getCellFromPixel(px, py);
     const idx = y * widthCells + x;
-    if (idx < 0 || idx >= grid.length) return;
+    if (idx < 0 || idx >= grid.length || paintDelay > 0) return;
+    paintDelay = 3;
     grid[idx] = typeId;
   }
 
@@ -86,7 +94,7 @@
 
     const newGrid = new Uint8Array(widthCells * heightCells);
     const newLifeGrid = new Uint16Array(widthCells * heightCells);
-    const newMomentum = new Uint16Array(widthCells * heightCells);
+    const newMomentum = new Int8Array(widthCells * heightCells);
 
     for (let y = 0; y < heightCells; y++) {
       for (let x = 0; x < widthCells; x++) {
@@ -111,6 +119,7 @@
     grid = newGrid;
     lifeGrid = newLifeGrid;
     momentum = newMomentum;
+    paintDelay = 0;
     renderFrame();
   }
 
@@ -150,8 +159,16 @@
     [momentum[a], momentum[b]] = [momentum[b], momentum[a]];
   }
 
-  function swap(a, b, swaps) {
-    swaps.push([a, b]);
+  function apply_set(index, particle, lifeGrid = 0, momentum = 0) {
+    grid[index] = particle;
+  }
+
+  function set_particle(index, particle, delayed_actions) {
+    delayed_actions.push([ACTION_SET, index, particle]);
+  }
+
+  function swap(a, b, delayed_actions) {
+    delayed_actions.push([ACTION_SWAP, a, b]);
   }
 
   // returns random integer over this interval: [0..max_value)
@@ -165,16 +182,34 @@
   }
 
   // returns the index chosen, or -1 if none
-  function swap_any(a, arr, swaps) {
+  function swap_any(a, arr, delayed_actions) {
     if (arr.length) {
       let b=choose(arr);
-      swap(a, b, swaps);
+      swap(a, b, delayed_actions);
       return b
     }
     return -1
   }
 
-  function updateParticlesInner(x, y, swaps) {
+  function get_neighbor_map(index) {
+    const neighbours = [
+      index - widthCells - 1, index - widthCells, index - widthCells + 1,
+      index - 1,                                  index + 1,
+      index + widthCells - 1, index + widthCells, index + widthCells + 1,
+    ];
+    const map = new Map();
+
+    for (const nIdx of neighbours) {
+      if (nIdx < 0 || nIdx >= grid.length) continue;
+      const type = grid[nIdx];
+      let count = map.get(type) ?? 0;
+      map.set(type, count+1);
+    }
+
+    return map;
+  }
+
+  function updateParticlesInner(x, y, delayed_actions) {
     const idx = y * widthCells + x;
     const type = grid[idx];
 
@@ -184,13 +219,13 @@
         if (y < heightCells - 1) {
           if (grid[below] === EMPTY || grid[below] === WATER) {
             // swap with empty or water below
-            swap(idx, below, swaps);
+            swap(idx, below, delayed_actions);
           } else {
             // try to move diagonally down left/right
             const diag = [];
             if (x > 0 && grid[below - 1] === EMPTY) diag.push(below - 1);
             if (x < widthCells - 1 && grid[below + 1] === EMPTY) diag.push(below + 1);
-            swap_any(idx, diag, swaps);
+            swap_any(idx, diag, delayed_actions);
           }
         }
         break;
@@ -200,7 +235,7 @@
         const below = idx + widthCells;
         if (y < heightCells - 1 && grid[below] === EMPTY) {
           // fall straight down
-          swap(idx, below, swaps);
+          swap(idx, below, delayed_actions);
         } else {
           // try diagonal moves
           const diag = [];
@@ -229,7 +264,7 @@
             } else { // only one diagonal is open
               b = diag[0];
             }
-            swap(idx, b, swaps);
+            swap(idx, b, delayed_actions);
           } else {
             let d;
 
@@ -249,9 +284,9 @@
             }
 
             if (d === 0 && x > 0 && grid[idx - 1] === EMPTY) {
-              swap(idx, idx - 1, swaps);
+              swap(idx, idx - 1, delayed_actions);
             } else if (d === 1 && x < widthCells - 1 && grid[idx + 1] === EMPTY) {
-              swap(idx, idx + 1, swaps);
+              swap(idx, idx + 1, delayed_actions);
             } else {
               momentum[idx] = 0;
             }
@@ -276,8 +311,8 @@
         for (const nIdx of neighbours) {
           if (nIdx < 0 || nIdx >= grid.length) continue;
           if (grid[nIdx] === WATER) {
-            grid[idx] = CLOUD1;
-            grid[nIdx] = CLOUD1;
+            set_particle(idx, CLOUD1, delayed_actions);
+            set_particle(nIdx, CLOUD1, delayed_actions);
             reacted = true;
             break;
           }
@@ -288,18 +323,18 @@
         if (y === heightCells - 1) break;
         const fireBelow = idx + widthCells;
         if (grid[fireBelow] === EMPTY) {
-          swap(idx, fireBelow, swaps);
+          swap(idx, fireBelow, delayed_actions);
         } else {
           const side = [];
           if (x > 0 && grid[idx - 1] === EMPTY) side.push(idx - 1);
           if (x < widthCells - 1 && grid[idx + 1] === EMPTY) side.push(idx + 1);
           if (side.length) {
-            swap_any(idx, side, swaps);
+            swap_any(idx, side, delayed_actions);
           } else {
             const diag = [];
             if (x > 0 && grid[fireBelow - 1] === EMPTY) diag.push(fireBelow - 1);
             if (x < widthCells - 1 && grid[fireBelow + 1] === EMPTY) diag.push(fireBelow + 1);
-            swap_any(idx, diag, swaps);
+            swap_any(idx, diag, delayed_actions);
           }
         }
         break;
@@ -331,11 +366,11 @@
         }
 
         if (reacted) {
-          grid[idx] = CLOUD2;
+          set_particle(idx, CLOUD2, delayed_actions);
           for (const nIdx of neighbours) {
             if (nIdx < 0 || nIdx >= grid.length) continue;
             if (grid[nIdx] === CLOUD1) {
-              grid[nIdx] = EMPTY;
+              set_particle(nIdx, EMPTY, delayed_actions);
               break;
             }
           }
@@ -347,7 +382,7 @@
         if (above >= 0) {
           if (grid[above] === EMPTY || grid[above] === FIRE || grid[above] === WATER) {
             // rise straight up
-            swap(idx, above, swaps);
+            swap(idx, above, delayed_actions);
           } else {
             // try diagonal moves
             const diag = [];
@@ -360,7 +395,7 @@
                || grid[above] === FIRE 
                || grid[above] === WATER)) diag.push(above + 1);
             if (diag.length) {
-              swap_any(idx, diag, swaps);
+              swap_any(idx, diag, delayed_actions);
             } else {
               try_side = true;
             }
@@ -374,7 +409,7 @@
           const side = [];
           if (x > 0 && grid[idx - 1] === EMPTY) side.push(idx - 1);
           if (x < widthCells - 1 && grid[idx + 1] === EMPTY) side.push(idx + 1);
-          swap_any(idx, side, swaps);
+          swap_any(idx, side, delayed_actions);
         }
         break;
       }
@@ -405,11 +440,11 @@
         }
 
         if (reacted) {
-          grid[idx] = CLOUD3;
+          set_particle(idx, CLOUD3, delayed_actions);
           for (const nIdx of neighbours) {
             if (nIdx < 0 || nIdx >= grid.length) continue;
             if (grid[nIdx] === CLOUD2) {
-              grid[nIdx] = EMPTY;
+              set_particle(nIdx, EMPTY, delayed_actions);
               break;
             }
           }
@@ -421,7 +456,7 @@
         if (above >= 0) {
           if (grid[above] === EMPTY || grid[above] === FIRE || grid[above] === WATER) {
             // rise straight up
-            swap(idx, above, swaps);
+            swap(idx, above, delayed_actions);
           } else {
             // try diagonal moves
             const diag = [];
@@ -436,7 +471,7 @@
                || grid[above] === WATER)
                ) diag.push(above + 1);
             if (diag.length) {
-              swap_any(idx, diag, swaps);
+              swap_any(idx, diag, delayed_actions);
             } else {
               try_side = true;
             }
@@ -458,7 +493,7 @@
                || grid[idx + 1] === CLOUD1
                )
              ) side.push(idx + 1);
-          swap_any(idx, side, swaps);
+          swap_any(idx, side, delayed_actions);
         }
         break;
       }
@@ -486,9 +521,9 @@
           for (const nIdx of neighbours) {
             if (nIdx < 0 || nIdx >= grid.length) continue;
             if (grid[nIdx] === EMPTY) {
-              grid[nIdx] = WATER;
+              set_particle(nIdx, WATER, delayed_actions);
               if (Math.random() > 0.9) {
-                grid[idx] = WATER;
+                set_particle(idx, WATER, delayed_actions);
                 break;
               }
             }
@@ -501,7 +536,7 @@
         if (above >= 0) {
           if (grid[above] === EMPTY || grid[above] === FIRE || grid[above] === WATER) {
             // rise straight up
-            swap(idx, above, swaps);
+            swap(idx, above, delayed_actions);
           } else {
             // try diagonal moves
             const diag = [];
@@ -516,7 +551,7 @@
                || grid[above] === WATER)
                ) diag.push(above + 1);
             if (diag.length) {
-              swap_any(idx, diag, swaps);
+              swap_any(idx, diag, delayed_actions);
             } else {
               try_side = true;
             }
@@ -538,7 +573,46 @@
                || grid[idx + 1] === CLOUD2
                )
              ) side.push(idx + 1);
-          swap_any(idx, side, swaps);
+          swap_any(idx, side, delayed_actions);
+        }
+        break;
+      }
+
+      case WOOD: {
+
+        const neighbours = [
+          idx - widthCells - 1, idx - widthCells, idx - widthCells + 1,
+          idx - 1,                                idx + 1,
+        ];
+        let reacted = false;
+
+        for (const nIdx of neighbours) {
+          if (nIdx < 0 || nIdx >= grid.length) continue;
+          if (grid[nIdx] === WATER) {
+            let neighbor_map = get_neighbor_map(nIdx);
+            let wood_count = neighbor_map.get(WOOD) ?? 0;
+            if (wood_count < 3 && Math.random() > 0.25) {
+              reacted = true;
+              set_particle(nIdx, WOOD, delayed_actions);
+              break;
+            } else if (Math.random() > 0.8) {
+              reacted = true;
+              set_particle(nIdx, EMPTY, delayed_actions);
+              break;
+            }
+          }
+        }
+
+        if (reacted) {
+          break;
+        }
+
+        const below = idx + widthCells;
+        let neighbor_map = get_neighbor_map(idx);
+        if (y < heightCells - 1 && (neighbor_map.get(WOOD) ?? 0) == 0) {
+          if (grid[below] === EMPTY || grid[below] === WATER) {
+            swap(idx, below, delayed_actions);
+          }
         }
         break;
       }
@@ -554,7 +628,7 @@
   function updateParticles() {
     let y = 0;
     let x;
-    let swaps = [];
+    let delayed_actions = [];
 
     let xs = Array.from({ length: widthCells }, (v, i) => i);
     xs.sort(() => Math.random() - 0.5);
@@ -563,35 +637,45 @@
 
     for (const y of ys) {
       for (const x of xs) {
-        updateParticlesInner(x, y, swaps)
+        updateParticlesInner(x, y, delayed_actions)
       }
     }
 
     // for (; y < heightCells; y+=2) {
     //   x = 0;
     //   for (; x < widthCells; x+=2) {
-    //     updateParticlesInner(x, y, swaps)
+    //     updateParticlesInner(x, y, delayed_actions)
     //   }
     //   x--;
     //   for (; x >= 0; x-=2) {
-    //     updateParticlesInner(x, y, swaps)
+    //     updateParticlesInner(x, y, delayed_actions)
     //   }
     // }
     // y--;
     // for (; y >= 0; y-=2) {
     //   x = 0;
     //   for (; x < widthCells; x+=2) {
-    //     updateParticlesInner(x, y, swaps)
+    //     updateParticlesInner(x, y, delayed_actions)
     //   }
     //   x--;
     //   for (; x >= 0; x-=2) {
-    //     updateParticlesInner(x, y, swaps)
+    //     updateParticlesInner(x, y, delayed_actions)
     //   }
     // }
 
-    for (const s of swaps) {
-      apply_swap(s[0], s[1]);
+    for (const s of delayed_actions) {
+      switch (s[0]) {
+        case ACTION_SET:
+          apply_set(s[1], s[2]);
+          break;
+        case ACTION_SWAP:
+          apply_swap(s[1], s[2]);
+          break;
+      }
     }
+
+    if (paintDelay > 0) paintDelay--;
+
   }
 
   // -----------------------------------------------------------
@@ -731,6 +815,9 @@
         case 'c':
           setActiveTool(CLOUD1);
           break;
+        case 't':
+          setActiveTool(WOOD);
+          break;
         case 'e':
           setActiveTool(EMPTY);
           break;
@@ -746,6 +833,16 @@
           clearGrid();
           renderFrame();
           e.preventDefault();
+          break;
+        case '=':
+          // increase brush size
+          brushSize++;
+          if (brushSize > 3) brushSize = 3;
+          break;
+        case '-':
+          // decrease brush size
+          brushSize--;
+          if (brushSize < 1) brushSize = 1;
           break;
         default:
           return;
