@@ -198,13 +198,6 @@
         const below = idx + widthCells;
         if (y < heightCells - 1 && grid[below] === EMPTY) {
           // fall straight down
-          if (momentum[idx] == 0) {
-            if (randInt(2) == 0) {
-              momentum[idx] = -1
-            } else {
-              momentum[idx] = 1
-            }
-          }
           swap(idx, below, swaps);
         } else {
           // try diagonal moves
@@ -217,7 +210,7 @@
             let d = randInt(diag.length);
             let b;
             if (diag.length > 1) {
-              if (momentum[idx] == 0) {
+              if (momentum[idx] === 0) {
                 if (d == 0) {
                   momentum[idx] = -1;
                 } else {
@@ -238,9 +231,9 @@
           } else {
             let d;
 
-            if (momentum[idx] == 0) {
+            if (momentum[idx] === 0) {
               d = randInt(2);
-              if (d == 0) {
+              if (d === 0) {
                 momentum[idx] = -1;
               } else {
                 momentum[idx] = 1;
@@ -253,12 +246,12 @@
               }
             }
 
-            if (d == 0 && x > 0 && grid[idx - 1] === EMPTY) {
+            if (d === 0 && x > 0 && grid[idx - 1] === EMPTY) {
               swap(idx, idx - 1, swaps);
-            } else if (d == 1 && x < widthCells - 1 && grid[idx + 1] === EMPTY) {
+            } else if (d === 1 && x < widthCells - 1 && grid[idx + 1] === EMPTY) {
               swap(idx, idx + 1, swaps);
-//            } else {
-//              momentum[idx] == 0;
+            } else {
+              momentum[idx] = 0;
             }
 
           }
@@ -348,27 +341,39 @@
     let y = 0;
     let x;
     let swaps = [];
-    for (; y < heightCells; y+=2) {
-      x = 0;
-      for (; x < widthCells; x+=2) {
-        updateParticlesInner(x, y, swaps)
-      }
-      x--;
-      for (; x >= 0; x-=2) {
-        updateParticlesInner(x, y, swaps)
-      }
-    }
-    y--;
-    for (; y >= 0; y-=2) {
-      x = 0;
-      for (; x < widthCells; x+=2) {
-        updateParticlesInner(x, y, swaps)
-      }
-      x--;
-      for (; x >= 0; x-=2) {
+
+    let xs = Array.from({ length: widthCells }, (v, i) => i);
+    xs.sort(() => Math.random() - 0.5);
+    let ys = Array.from({ length: heightCells }, (v, i) => i);
+    ys.sort(() => Math.random() - 0.5);
+
+    for (const y of ys) {
+      for (const x of xs) {
         updateParticlesInner(x, y, swaps)
       }
     }
+
+    // for (; y < heightCells; y+=2) {
+    //   x = 0;
+    //   for (; x < widthCells; x+=2) {
+    //     updateParticlesInner(x, y, swaps)
+    //   }
+    //   x--;
+    //   for (; x >= 0; x-=2) {
+    //     updateParticlesInner(x, y, swaps)
+    //   }
+    // }
+    // y--;
+    // for (; y >= 0; y-=2) {
+    //   x = 0;
+    //   for (; x < widthCells; x+=2) {
+    //     updateParticlesInner(x, y, swaps)
+    //   }
+    //   x--;
+    //   for (; x >= 0; x-=2) {
+    //     updateParticlesInner(x, y, swaps)
+    //   }
+    // }
 
     for (const s of swaps) {
       apply_swap(s[0], s[1]);
@@ -448,7 +453,7 @@
 
     grid = new Uint8Array(widthCells * heightCells);
     lifeGrid = new Uint16Array(widthCells * heightCells);
-    momentum = new Uint16Array(widthCells * heightCells);
+    momentum = new Int8Array(widthCells * heightCells);
 
     // ----- toolbar buttons -----
     tools = document.querySelectorAll('.tool');
