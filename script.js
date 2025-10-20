@@ -62,7 +62,7 @@
     const idx = y * widthCells + x;
     if (idx < 0 || idx >= grid.length) return;
     grid[idx] = typeId;
-    if (typeId === STEAM) lifeGrid[idx] = STEAM_LIFETIME;
+    //if (typeId === STEAM) lifeGrid[idx] = STEAM_LIFETIME;
   }
 
   function clearGrid() {
@@ -137,6 +137,11 @@
     if (mouseDown) paintAt(mousePos.x, mousePos.y, activeTool);
   }
 
+  function swap(a, b) {
+    [grid[a], grid[b]] = [grid[b], grid[a]];
+    [lifeGrid[a], lifeGrid[b]] = [lifeGrid[b], lifeGrid[a]];
+  }
+
   // -----------------------------------------------------------
   // PARTICLE SIMULATION (big switch)
   // -----------------------------------------------------------
@@ -152,8 +157,7 @@
             const below = idx + widthCells;
             if (grid[below] === EMPTY || grid[below] === WATER) {
               // swap with empty or water below
-              [grid[idx], grid[below]] = [grid[below], grid[idx]];
-              [lifeGrid[idx], lifeGrid[below]] = [lifeGrid[below], lifeGrid[idx]];
+              swap(idx, below);
             } else {
               // try to slide left/right
               const left = x > 0 ? below - 1 : -1;
@@ -163,8 +167,7 @@
               if (right !== -1 && grid[right] === EMPTY) candidates.push(right);
               if (candidates.length) {
                 const target = candidates[Math.random() < 0.5 ? 0 : 1];
-                [grid[idx], grid[target]] = [grid[target], grid[idx]];
-                [lifeGrid[idx], lifeGrid[target]] = [lifeGrid[target], lifeGrid[idx]];
+                swap(idx, target);
               }
             }
             break;
@@ -175,8 +178,7 @@
             const waterBelow = idx + widthCells;
             if (grid[waterBelow] === EMPTY) {
               // fall straight down
-              [grid[idx], grid[waterBelow]] = [grid[waterBelow], grid[idx]];
-              [lifeGrid[idx], lifeGrid[waterBelow]] = [lifeGrid[waterBelow], lifeGrid[idx]];
+              swap(idx, waterBelow);
             } else {
               // try side then diagonal moves
               const side = [];
@@ -184,16 +186,14 @@
               if (x < widthCells - 1 && grid[idx + 1] === EMPTY) side.push(idx + 1);
               if (side.length) {
                 const target = side[Math.random() < 0.5 ? 0 : 1];
-                [grid[idx], grid[target]] = [grid[target], grid[idx]];
-                [lifeGrid[idx], lifeGrid[target]] = [lifeGrid[target], lifeGrid[idx]];
+                swap(idx, target);
               } else {
                 const diag = [];
                 if (x > 0 && grid[waterBelow - 1] === EMPTY) diag.push(waterBelow - 1);
                 if (x < widthCells - 1 && grid[waterBelow + 1] === EMPTY) diag.push(waterBelow + 1);
                 if (diag.length) {
                   const target = diag[Math.random() < 0.5 ? 0 : 1];
-                  [grid[idx], grid[target]] = [grid[target], grid[idx]];
-                  [lifeGrid[idx], lifeGrid[target]] = [lifeGrid[target], lifeGrid[idx]];
+                  swap(idx, target);
                 }
               }
             }
@@ -229,24 +229,21 @@
             if (y === heightCells - 1) break;
             const fireBelow = idx + widthCells;
             if (grid[fireBelow] === EMPTY) {
-              [grid[idx], grid[fireBelow]] = [grid[fireBelow], grid[idx]];
-              [lifeGrid[idx], lifeGrid[fireBelow]] = [lifeGrid[fireBelow], lifeGrid[idx]];
+              swap(idx, fireBelow);
             } else {
               const side = [];
               if (x > 0 && grid[idx - 1] === EMPTY) side.push(idx - 1);
               if (x < widthCells - 1 && grid[idx + 1] === EMPTY) side.push(idx + 1);
               if (side.length) {
                 const target = side[Math.random() < 0.5 ? 0 : 1];
-                [grid[idx], grid[target]] = [grid[target], grid[idx]];
-                [lifeGrid[idx], lifeGrid[target]] = [lifeGrid[target], lifeGrid[idx]];
+                swap(idx, target);
               } else {
                 const diag = [];
                 if (x > 0 && grid[fireBelow - 1] === EMPTY) diag.push(fireBelow - 1);
                 if (x < widthCells - 1 && grid[fireBelow + 1] === EMPTY) diag.push(fireBelow + 1);
                 if (diag.length) {
                   const target = diag[Math.random() < 0.5 ? 0 : 1];
-                  [grid[idx], grid[target]] = [grid[target], grid[idx]];
-                  [lifeGrid[idx], lifeGrid[target]] = [lifeGrid[target], lifeGrid[idx]];
+                  swap(idx, target);
                 }
               }
             }
@@ -261,8 +258,7 @@
             const above = idx - widthCells;
             if (grid[above] === EMPTY) {
               // rise straight up
-              [grid[idx], grid[above]] = [grid[above], grid[idx]];
-              [lifeGrid[idx], lifeGrid[above]] = [lifeGrid[above], lifeGrid[idx]];
+              swap(idx, above);
             } else {
               // try side then diagonal moves
               const side = [];
@@ -270,16 +266,14 @@
               if (x < widthCells - 1 && grid[idx + 1] === EMPTY) side.push(idx + 1);
               if (side.length) {
                 const target = side[Math.random() < 0.5 ? 0 : 1];
-                [grid[idx], grid[target]] = [grid[target], grid[idx]];
-                [lifeGrid[idx], lifeGrid[target]] = [lifeGrid[target], lifeGrid[idx]];
+                swap(idx, target);
               } else {
                 const diag = [];
                 if (x > 0 && grid[above - 1] === EMPTY) diag.push(above - 1);
                 if (x < widthCells - 1 && grid[above + 1] === EMPTY) diag.push(above + 1);
                 if (diag.length) {
                   const target = diag[Math.random() < 0.5 ? 0 : 1];
-                  [grid[idx], grid[target]] = [grid[target], grid[idx]];
-                  [lifeGrid[idx], lifeGrid[target]] = [lifeGrid[target], lifeGrid[idx]];
+                  swap(idx, target);
                 }
               }
             }
