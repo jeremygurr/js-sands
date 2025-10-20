@@ -295,17 +295,53 @@
   // PARTICLE SIMULATION (big switch)
   // -----------------------------------------------------------
   function updateParticles() {
-    for (let y = heightCells - 1; y >= 0; y--) {
-      if (randInt(2) == 1) {
-        for (let x = 0; x < widthCells; x++) {
-          updateParticlesInner(x, y)
-        }
-      } else {
-        for (let x = widthCells - 1; x >= 0; x--) {
-          updateParticlesInner(x, y)
-        }
+    let y = 0;
+    let x = 0;
+    for (; y < heightCells; y+=2) {
+      for (; x < widthCells; x+=2) {
+        updateParticlesInner(x, y)
+      }
+      x--;
+      for (; x >= 0; x-=2) {
+        updateParticlesInner(x, y)
       }
     }
+    y--;
+    for (; y >= 0; y-=2) {
+      x = 0;
+      for (; x < widthCells; x+=2) {
+        updateParticlesInner(x, y)
+      }
+      x--;
+      for (; x >= 0; x-=2) {
+        updateParticlesInner(x, y)
+      }
+    }
+//     if (randInt(2) == 1) {
+//       for (let y = heightCells - 1; y >= 0; y--) {
+//         if (randInt(2) == 1) {
+//           for (let x = 0; x < widthCells; x++) {
+//             updateParticlesInner(x, y)
+//           }
+//         } else {
+//           for (let x = widthCells - 1; x >= 0; x--) {
+//             updateParticlesInner(x, y)
+//           }
+//         }
+//       }
+//     } else {
+//       for (let y = 0; y < heightCells; y++) {
+//         if (randInt(2) == 1) {
+//           for (let x = 0; x < widthCells; x++) {
+//             updateParticlesInner(x, y)
+//           }
+//         } else {
+//           for (let x = widthCells - 1; x >= 0; x--) {
+//             updateParticlesInner(x, y)
+//           }
+//         }
+//       }
+//     }
   }
 
   // -----------------------------------------------------------
