@@ -259,12 +259,12 @@
         break;
       }
 
-      case STONE: {              // ---- Stone ----
+      case STONE: {
         // Stone never moves – nothing to do
         break;
       }
 
-      case FIRE: {               // ---- Fire ----
+      case FIRE: {
         const neighbours = [
           idx - widthCells - 1, idx - widthCells, idx - widthCells + 1,
           idx - 1,                                idx + 1,
@@ -303,11 +303,9 @@
         break;
       }
 
-      case STEAM: {              // ---- Steam ----
-        // NOTE: the lifetime‑decrement code is commented out in the original
-        // if (--lifeGrid[idx] <= 0) { grid[idx] = EMPTY; break; }
-
+      case STEAM: {
         const above = idx - widthCells;
+        let try_side = false;
         if (above >= 0) {
           if (grid[above] === EMPTY) {
             // rise straight up
@@ -317,9 +315,17 @@
             const diag = [];
             if (x > 0 && grid[above - 1] === EMPTY) diag.push(above - 1);
             if (x < widthCells - 1 && grid[above + 1] === EMPTY) diag.push(above + 1);
-            swap_any(idx, diag, swaps);
+            if (diag.length) {
+              swap_any(idx, diag, swaps);
+            } else {
+              try_side = true;
+            }
           }
         } else {
+          try_side = true;
+        }
+
+        if (try_side) {
           // try side moves
           const side = [];
           if (x > 0 && grid[idx - 1] === EMPTY) side.push(idx - 1);
