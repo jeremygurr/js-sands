@@ -1,12 +1,20 @@
-/* ---------------------------------------------------------------
+/* -----------------------------------------------------------
    Falling‑Sands Playground – main JavaScript (refactored)
-   --------------------------------------------------------------- */
+   ----------------------------------------------------------- */
 (function () {
-  // -----------------------------------------------------------------
+  // -----------------------------------------------------------
   // CONFIGURATION & GLOBALS
-  // -----------------------------------------------------------------
+  // -----------------------------------------------------------
   const CELL_SIZE = 8;
   const STEAM_LIFETIME = 120;
+
+  // ----- particle type IDs (named constants) -----
+  const EMPTY = 0;
+  const SAND = 1;
+  const WATER = 2;
+  const STONE = 3;
+  const FIRE = 4;
+  const STEAM = 5;
 
   const canvas = document.getElementById('world');
   const ctx = canvas.getContext('2d');
@@ -17,9 +25,9 @@
 
   let widthCells = 0;
   let heightCells = 0;
-  let grid = null;        // Uint8Array – material IDs
-  let lifeGrid = null;    // Uint16Array – steam lifetimes
-  let activeTool = 1;     // **default to sand** (ID = 1)
+  let grid = null;   // Uint8Array – material IDs
+  let lifeGrid = null;   // Uint16Array – steam lifetimes
+  let activeTool = SAND;   // default to sand
   let mouseDown = false;
   let mousePos = { x: 0, y: 0 };
   let paused = false;
@@ -28,17 +36,17 @@
   let fps = 0;
 
   const PALETTE = [
-    [0][0][0][0],           // 0 – empty (transparent)
-    [194][178][128][255],   // 1 – sand
-    [74][144][226][255],    // 2 – water
-    [85][85][85][255],      // 3 – stone
-    [255][69][0][255],      // 4 – fire
-    [204][204][255][180]    // 5 – steam (semi‑transparent)
+    [0, 0, 0, 0], // EMPTY – transparent
+    [194, 178, 128, 255],    // SAND
+    [74, 144, 226, 255],    // WATER
+    [85, 85, 85, 255],   // STONE
+    [255, 69, 0, 255],    // FIRE
+    [204, 204, 255, 180]     // STEAM (semi‑transparent)
   ];
 
-  // -----------------------------------------------------------------
+  // -----------------------------------------------------------
   // HELPERS
-  // -----------------------------------------------------------------
+  // -----------------------------------------------------------
   function clamp(val, min, max) {
     return Math.max(min, Math.min(max, val));
   }
@@ -54,11 +62,11 @@
     const idx = y * widthCells + x;
     if (idx < 0 || idx >= grid.length) return;
     grid[idx] = typeId;
-    if (typeId === 5) lifeGrid[idx] = STEAM_LIFETIME; // steam
+    if (typeId === STEAM) lifeGrid[idx] = STEAM_LIFETIME;
   }
 
   function clearGrid() {
-    grid.fill(0);
+    grid.fill(EMPTY);
     lifeGrid.fill(0);
   }
 
@@ -122,16 +130,16 @@
     }
   }
 
-  // -----------------------------------------------------------------
+  // -----------------------------------------------------------
   // MOUSE / PAINTING
-  // -----------------------------------------------------------------
+  // -----------------------------------------------------------
   function handleMousePainting() {
     if (mouseDown) paintAt(mousePos.x, mousePos.y, activeTool);
   }
 
-  // -----------------------------------------------------------------
+  // -----------------------------------------------------------
   // PARTICLE SIMULATION (big switch)
-  // -----------------------------------------------------------------
+  // -----------------------------------------------------------
   function updateParticles() {
     for (let y = heightCells - 1; y >= 0; y--) {
       for (let x = 0; x < widthCells; x++) {
@@ -139,105 +147,76 @@
         const type = grid[idx];
 
         switch (type) {
-          case 1: {
-            // Sand
+          case SAND: {               // ---- Sand ----
             if (y === heightCells - 1) break;
             const below = idx + widthCells;
-            if (grid[below] === 0 || grid[below] === 2) {
-              const tmp = grid[idx];
-              grid[idx] = grid[below];
-              grid[below] = tmp;
-
-              const lifeA = lifeGrid[idx];
-              const lifeB = lifeGrid[below];
-              lifeGrid[idx] = lifeB;
-              lifeGrid[below] = lifeA;
+            if (grid[below] === EMPTY || grid[below] === WATER) {
+              // swap with empty or water below
+              [grid[idx], grid[below]] = [grid[below], grid[idx]];
+              [lifeGrid[idx], lifeGrid[below]] = [lifeGrid[below], lifeGrid[idx]];
             } else {
+              // try to slide left/right
               const left = x > 0 ? below - 1 : -1;
               const right = x < widthCells - 1 ? below + 1 : -1;
               const candidates = [];
-              if (left !== -1 && grid[left] === 0) candidates.push(left);
-              if (right !== -1 && grid[right] === 0) candidates.push(right);
+              if (left !== -1 && grid[left] === EMPTY) candidates.push(left);
+              if (right !== -1 && grid[right] === EMPTY) candidates.push(right);
               if (candidates.length) {
                 const target = candidates[Math.random() < 0.5 ? 0 : 1];
-                const tmp = grid[idx];
-                grid[idx] = grid[target];
-                grid[target] = tmp;
-
-                const lifeA = lifeGrid[idx];
-                const lifeB = lifeGrid[target];
-                lifeGrid[idx] = lifeB;
-                lifeGrid[target] = lifeA;
+                [grid[idx], grid[target]] = [grid[target], grid[idx]];
+                [lifeGrid[idx], lifeGrid[target]] = [lifeGrid[target], lifeGrid[idx]];
               }
             }
             break;
           }
 
-          case 2: {
-            // Water
+          case WATER: {              // ---- Water ----
             if (y === heightCells - 1) break;
             const waterBelow = idx + widthCells;
-            if (grid[waterBelow] === 0) {
-              const tmp = grid[idx];
-              grid[idx] = grid[waterBelow];
-              grid[waterBelow] = tmp;
-
-              const lifeA = lifeGrid[idx];
-              const lifeB = lifeGrid[waterBelow];
-              lifeGrid[idx] = lifeB;
-              lifeGrid[waterBelow] = lifeA;
+            if (grid[waterBelow] === EMPTY) {
+              // fall straight down
+              [grid[idx], grid[waterBelow]] = [grid[waterBelow], grid[idx]];
+              [lifeGrid[idx], lifeGrid[waterBelow]] = [lifeGrid[waterBelow], lifeGrid[idx]];
             } else {
+              // try side then diagonal moves
               const side = [];
-              if (x > 0 && grid[idx - 1] === 0) side.push(idx - 1);
-              if (x < widthCells - 1 && grid[idx + 1] === 0) side.push(idx + 1);
+              if (x > 0 && grid[idx - 1] === EMPTY) side.push(idx - 1);
+              if (x < widthCells - 1 && grid[idx + 1] === EMPTY) side.push(idx + 1);
               if (side.length) {
                 const target = side[Math.random() < 0.5 ? 0 : 1];
-                const tmp = grid[idx];
-                grid[idx] = grid[target];
-                grid[target] = tmp;
-
-                const lifeA = lifeGrid[idx];
-                const lifeB = lifeGrid[target];
-                lifeGrid[idx] = lifeB;
-                lifeGrid[target] = lifeA;
+                [grid[idx], grid[target]] = [grid[target], grid[idx]];
+                [lifeGrid[idx], lifeGrid[target]] = [lifeGrid[target], lifeGrid[idx]];
               } else {
                 const diag = [];
-                if (x > 0 && grid[waterBelow - 1] === 0) diag.push(waterBelow - 1);
-                if (x < widthCells - 1 && grid[waterBelow + 1] === 0) diag.push(waterBelow + 1);
+                if (x > 0 && grid[waterBelow - 1] === EMPTY) diag.push(waterBelow - 1);
+                if (x < widthCells - 1 && grid[waterBelow + 1] === EMPTY) diag.push(waterBelow + 1);
                 if (diag.length) {
                   const target = diag[Math.random() < 0.5 ? 0 : 1];
-                  const tmp = grid[idx];
-                  grid[idx] = grid[target];
-                  grid[target] = tmp;
-
-                  const lifeA = lifeGrid[idx];
-                  const lifeB = lifeGrid[target];
-                  lifeGrid[idx] = lifeB;
-                  lifeGrid[target] = lifeA;
+                  [grid[idx], grid[target]] = [grid[target], grid[idx]];
+                  [lifeGrid[idx], lifeGrid[target]] = [lifeGrid[target], lifeGrid[idx]];
                 }
               }
             }
             break;
           }
 
-          case 4: {
-            // Fire
+          case STONE: {              // ---- Stone ----
+            // Stone never moves – nothing to do
+            break;
+          }
+
+          case FIRE: {               // ---- Fire ----
             const neighbours = [
-              idx - widthCells - 1,
-              idx - widthCells,
-              idx - widthCells + 1,
-              idx - 1,
-              idx + 1,
-              idx + widthCells - 1,
-              idx + widthCells,
-              idx + widthCells + 1,
+              idx - widthCells - 1, idx - widthCells, idx - widthCells + 1,
+              idx - 1, idx + 1,
+              idx + widthCells - 1, idx + widthCells, idx + widthCells + 1,
             ];
             let reacted = false;
             for (const nIdx of neighbours) {
               if (nIdx < 0 || nIdx >= grid.length) continue;
-              if (grid[nIdx] === 2) {
-                grid[idx] = 5;
-                grid[nIdx] = 5;
+              if (grid[nIdx] === WATER) {
+                grid[idx] = STEAM;
+                grid[nIdx] = STEAM;
                 lifeGrid[idx] = STEAM_LIFETIME;
                 lifeGrid[nIdx] = STEAM_LIFETIME;
                 reacted = true;
@@ -246,96 +225,61 @@
             }
             if (reacted) break;
 
+            // fire behaves like sand (falls) but can also spread sideways/diag
             if (y === heightCells - 1) break;
             const fireBelow = idx + widthCells;
-            if (grid[fireBelow] === 0) {
-              const tmp = grid[idx];
-              grid[idx] = grid[fireBelow];
-              grid[fireBelow] = tmp;
-
-              const lifeA = lifeGrid[idx];
-              const lifeB = lifeGrid[fireBelow];
-              lifeGrid[idx] = lifeB;
-              lifeGrid[fireBelow] = lifeA;
+            if (grid[fireBelow] === EMPTY) {
+              [grid[idx], grid[fireBelow]] = [grid[fireBelow], grid[idx]];
+              [lifeGrid[idx], lifeGrid[fireBelow]] = [lifeGrid[fireBelow], lifeGrid[idx]];
             } else {
               const side = [];
-              if (x > 0 && grid[idx - 1] === 0) side.push(idx - 1);
-              if (x < widthCells - 1 && grid[idx + 1] === 0) side.push(idx + 1);
+              if (x > 0 && grid[idx - 1] === EMPTY) side.push(idx - 1);
+              if (x < widthCells - 1 && grid[idx + 1] === EMPTY) side.push(idx + 1);
               if (side.length) {
                 const target = side[Math.random() < 0.5 ? 0 : 1];
-                const tmp = grid[idx];
-                grid[idx] = grid[target];
-                grid[target] = tmp;
-
-                const lifeA = lifeGrid[idx];
-                const lifeB = lifeGrid[target];
-                lifeGrid[idx] = lifeB;
-                lifeGrid[target] = lifeA;
+                [grid[idx], grid[target]] = [grid[target], grid[idx]];
+                [lifeGrid[idx], lifeGrid[target]] = [lifeGrid[target], lifeGrid[idx]];
               } else {
                 const diag = [];
-                if (x > 0 && grid[fireBelow - 1] === 0) diag.push(fireBelow - 1);
-                if (x < widthCells - 1 && grid[fireBelow + 1] === 0) diag.push(fireBelow + 1);
+                if (x > 0 && grid[fireBelow - 1] === EMPTY) diag.push(fireBelow - 1);
+                if (x < widthCells - 1 && grid[fireBelow + 1] === EMPTY) diag.push(fireBelow + 1);
                 if (diag.length) {
                   const target = diag[Math.random() < 0.5 ? 0 : 1];
-                  const tmp = grid[idx];
-                  grid[idx] = grid[target];
-                  grid[target] = tmp;
-
-                  const lifeA = lifeGrid[idx];
-                  const lifeB = lifeGrid[target];
-                  lifeGrid[idx] = lifeB;
-                  lifeGrid[target] = lifeA;
+                  [grid[idx], grid[target]] = [grid[target], grid[idx]];
+                  [lifeGrid[idx], lifeGrid[target]] = [lifeGrid[target], lifeGrid[idx]];
                 }
               }
             }
             break;
           }
 
-          case 5: {
-            // Steam
-            // if (--lifeGrid[idx] <= 0) {
-            //   grid[idx] = 0;
-            //   break;
-            // }
-            // if (y === 0) break;
-            const above = idx - widthCells;
-            if (above >= 0 && grid[above] === 0) {
-              const tmp = grid[idx];
-              grid[idx] = grid[above];
-              grid[above] = tmp;
+          case STEAM: {              // ---- Steam ----
+            // NOTE: the lifetime‑decrement code is commented out in the original
+            // if (--lifeGrid[idx] <= 0) { grid[idx] = EMPTY; break; }
 
-              const lifeA = lifeGrid[idx];
-              const lifeB = lifeGrid[above];
-              lifeGrid[idx] = lifeB;
-              lifeGrid[above] = lifeA;
+            if (y === 0) break; // top of screen – can't rise further
+            const above = idx - widthCells;
+            if (grid[above] === EMPTY) {
+              // rise straight up
+              [grid[idx], grid[above]] = [grid[above], grid[idx]];
+              [lifeGrid[idx], lifeGrid[above]] = [lifeGrid[above], lifeGrid[idx]];
             } else {
+              // try side then diagonal moves
               const side = [];
-              if (x > 0 && grid[idx - 1] === 0) side.push(idx - 1);
-              if (x < widthCells - 1 && grid[idx + 1] === 0) side.push(idx + 1);
+              if (x > 0 && grid[idx - 1] === EMPTY) side.push(idx - 1);
+              if (x < widthCells - 1 && grid[idx + 1] === EMPTY) side.push(idx + 1);
               if (side.length) {
                 const target = side[Math.random() < 0.5 ? 0 : 1];
-                const tmp = grid[idx];
-                grid[idx] = grid[target];
-                grid[target] = tmp;
-
-                const lifeA = lifeGrid[idx];
-                const lifeB = lifeGrid[target];
-                lifeGrid[idx] = lifeB;
-                lifeGrid[target] = lifeA;
+                [grid[idx], grid[target]] = [grid[target], grid[idx]];
+                [lifeGrid[idx], lifeGrid[target]] = [lifeGrid[target], lifeGrid[idx]];
               } else {
                 const diag = [];
-                if (x > 0 && grid[above - 1] === 0) diag.push(above - 1);
-                if (x < widthCells - 1 && grid[above + 1] === 0) diag.push(above + 1);
+                if (x > 0 && grid[above - 1] === EMPTY) diag.push(above - 1);
+                if (x < widthCells - 1 && grid[above + 1] === EMPTY) diag.push(above + 1);
                 if (diag.length) {
                   const target = diag[Math.random() < 0.5 ? 0 : 1];
-                  const tmp = grid[idx];
-                  grid[idx] = grid[target];
-                  grid[target] = tmp;
-
-                  const lifeA = lifeGrid[idx];
-                  const lifeB = lifeGrid[target];
-                  lifeGrid[idx] = lifeB;
-                  lifeGrid[target] = lifeA;
+                  [grid[idx], grid[target]] = [grid[target], grid[idx]];
+                  [lifeGrid[idx], lifeGrid[target]] = [lifeGrid[target], lifeGrid[idx]];
                 }
               }
             }
@@ -349,9 +293,9 @@
     }
   }
 
-  // -----------------------------------------------------------------
+  // -----------------------------------------------------------
   // RENDERING
-  // -----------------------------------------------------------------
+  // -----------------------------------------------------------
   function renderFrame() {
     const imageData = ctx.createImageData(canvas.width, canvas.height);
     const data = imageData.data;
@@ -378,9 +322,9 @@
     ctx.putImageData(imageData, 0, 0);
   }
 
-  // -----------------------------------------------------------------
+  // -----------------------------------------------------------
   // FPS COUNTER
-  // -----------------------------------------------------------------
+  // -----------------------------------------------------------
   function updateFps() {
     frameCount++;
     const now = Date.now();
@@ -392,9 +336,9 @@
     }
   }
 
-  // -----------------------------------------------------------------
+  // -----------------------------------------------------------
   // MAIN LOOP
-  // -----------------------------------------------------------------
+  // -----------------------------------------------------------
   function tick() {
     if (paused) {
       requestAnimationFrame(tick);
@@ -407,9 +351,9 @@
     requestAnimationFrame(tick);
   }
 
-  // -----------------------------------------------------------------
+  // -----------------------------------------------------------
   // INITIALISATION
-  // -----------------------------------------------------------------
+  // -----------------------------------------------------------
   let tools; // will hold the NodeList of tool buttons (global for setActiveTool)
 
   function init() {
@@ -426,8 +370,8 @@
     // ----- toolbar buttons -----
     tools = document.querySelectorAll('.tool');
 
-    // ---- set default tool (sand) using the new helper ----
-    setActiveTool(1); // sand = ID 1
+    // set default tool (sand) using the new helper
+    setActiveTool(SAND);
 
     // Click‑handler for any tool (keeps UI in sync)
     tools.forEach(btn => {
@@ -471,27 +415,29 @@
     window.addEventListener('keydown', e => {
       switch (e.key.toLowerCase()) {
         case 's':
-          setActiveTool(1);
+          setActiveTool(SAND);
           break;
         case 'w':
-          setActiveTool(2);
+          setActiveTool(WATER);
           break;
         case 'r':
-          setActiveTool(3);
+          setActiveTool(STONE);
           break;
         case 'f':
-          setActiveTool(4);
+          setActiveTool(FIRE);
           break;
         case 'e':
-          setActiveTool(0);
+          setActiveTool(EMPTY);
           break;
-        case ' ': // space → pause
+        case ' ':
+          // space → pause
           paused = !paused;
           pauseBtn.classList.toggle('paused');
           pauseBtn.setAttribute('aria-pressed', paused ? 'true' : 'false');
           e.preventDefault();
           break;
-        case 'c': // clear
+        case 'c':
+          // clear
           clearGrid();
           renderFrame();
           e.preventDefault();
