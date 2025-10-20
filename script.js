@@ -717,9 +717,13 @@
 
         const below = idx + widthCells;
         let neighbor_map = get_neighbor_map(idx);
-        if (y < heightCells - 1 && (neighbor_map.get(WOOD) ?? 0) == 0) {
-          if (grid[below] === EMPTY || grid[below] === WATER) {
-            swap(idx, below, delayed_actions);
+        if (y < heightCells - 1) {
+          if (grid[below] === EMPTY || grid[below] == WATER) {
+            if ((neighbor_map.get(WOOD) ?? 0) == 0) {
+              swap(idx, below, delayed_actions);
+            }
+//          } else if (grid[below] == WATER) {
+//            swap(idx, below, delayed_actions);
           }
         }
         break;
