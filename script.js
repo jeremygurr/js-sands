@@ -142,10 +142,14 @@
     if (mouseDown) paintAt(mousePos.x, mousePos.y, activeTool);
   }
 
-  function swap(a, b) {
+  function apply_swap(a, b) {
     [grid[a], grid[b]] = [grid[b], grid[a]];
     [lifeGrid[a], lifeGrid[b]] = [lifeGrid[b], lifeGrid[a]];
     [momentum[a], momentum[b]] = [momentum[b], momentum[a]];
+  }
+
+  function swap(a, b, swaps) {
+    swaps.push([a, b]);
   }
 
   // returns random integer over this interval: [0..max_value)
@@ -158,14 +162,17 @@
     return arr[randomIndex];
   }
 
-  function swap_any(a, arr) {
+  // returns the index chosen, or -1 if none
+  function swap_any(a, arr, swaps) {
     if (arr.length) {
       let b=choose(arr);
-      swap(a, b);
+      swap(a, b, swaps);
+      return b
     }
+    return -1
   }
 
-  function updateParticlesInner(x, y) {
+  function updateParticlesInner(x, y, swaps) {
     const idx = y * widthCells + x;
     const type = grid[idx];
 
@@ -175,16 +182,13 @@
         if (y < heightCells - 1) {
           if (grid[below] === EMPTY || grid[below] === WATER) {
             // swap with empty or water below
-            if (grid[below] == WATER && momentum[below] == 0) {
-              momentum[below] = randInt(3) - 1;
-            }
-            swap(idx, below);
+            swap(idx, below, swaps);
           } else {
             // try to move diagonally down left/right
             const diag = [];
             if (x > 0 && grid[below - 1] === EMPTY) diag.push(below - 1);
             if (x < widthCells - 1 && grid[below + 1] === EMPTY) diag.push(below + 1);
-            swap_any(idx, diag);
+            swap_any(idx, diag, swaps);
           }
         }
         break;
@@ -194,7 +198,14 @@
         const below = idx + widthCells;
         if (y < heightCells - 1 && grid[below] === EMPTY) {
           // fall straight down
-          swap(idx, below);
+          if (momentum[idx] == 0) {
+            if (randInt(2) == 0) {
+              momentum[idx] = -1
+            } else {
+              momentum[idx] = 1
+            }
+          }
+          swap(idx, below, swaps);
         } else {
           // try diagonal moves
           const diag = [];
@@ -203,14 +214,53 @@
             if (x < widthCells - 1 && grid[below + 1] === EMPTY) diag.push(below + 1);
           }
           if (diag.length) {
-            swap_any(idx, diag);
-          } else {
-            const direction = Math.floor(Math.random() * 2);
-            if (direction == 0) {
-              if (x > 0 && grid[idx - 1] === EMPTY) swap(idx, idx - 1);
-            } else {
-              if (x < widthCells - 1 && grid[idx + 1] === EMPTY) swap(idx, idx + 1);
+            let d = randInt(diag.length);
+            let b;
+            if (diag.length > 1) {
+              if (momentum[idx] == 0) {
+                if (d == 0) {
+                  momentum[idx] = -1;
+                } else {
+                  momentum[idx] = 1;
+                }
+              } else { // momentum is already set
+                if (momentum[idx] == -1) {
+                  d = 0;
+                } else {
+                  d = 1;
+                }
+              }
+              b = diag[d];
+            } else { // only one diagonal is open
+              b = diag[0];
             }
+            swap(idx, b, swaps);
+          } else {
+            let d;
+
+            if (momentum[idx] == 0) {
+              d = randInt(2);
+              if (d == 0) {
+                momentum[idx] = -1;
+              } else {
+                momentum[idx] = 1;
+              }
+            } else {
+              if (momentum[idx] < 0) {
+                d = 0;
+              } else {
+                d = 1;
+              }
+            }
+
+            if (d == 0 && x > 0 && grid[idx - 1] === EMPTY) {
+              swap(idx, idx - 1, swaps);
+            } else if (d == 1 && x < widthCells - 1 && grid[idx + 1] === EMPTY) {
+              swap(idx, idx + 1, swaps);
+//            } else {
+//              momentum[idx] == 0;
+            }
+
           }
         }
         break;
@@ -243,18 +293,18 @@
         if (y === heightCells - 1) break;
         const fireBelow = idx + widthCells;
         if (grid[fireBelow] === EMPTY) {
-          swap(idx, fireBelow);
+          swap(idx, fireBelow, swaps);
         } else {
           const side = [];
           if (x > 0 && grid[idx - 1] === EMPTY) side.push(idx - 1);
           if (x < widthCells - 1 && grid[idx + 1] === EMPTY) side.push(idx + 1);
           if (side.length) {
-            swap_any(idx, side);
+            swap_any(idx, side, swaps);
           } else {
             const diag = [];
             if (x > 0 && grid[fireBelow - 1] === EMPTY) diag.push(fireBelow - 1);
             if (x < widthCells - 1 && grid[fireBelow + 1] === EMPTY) diag.push(fireBelow + 1);
-            swap_any(idx, diag);
+            swap_any(idx, diag, swaps);
           }
         }
         break;
@@ -268,20 +318,20 @@
         if (above >= 0) {
           if (grid[above] === EMPTY) {
             // rise straight up
-            swap(idx, above);
+            swap(idx, above, swaps);
           } else {
             // try diagonal moves
             const diag = [];
             if (x > 0 && grid[above - 1] === EMPTY) diag.push(above - 1);
             if (x < widthCells - 1 && grid[above + 1] === EMPTY) diag.push(above + 1);
-            swap_any(idx, diag);
+            swap_any(idx, diag, swaps);
           }
         } else {
           // try side moves
           const side = [];
           if (x > 0 && grid[idx - 1] === EMPTY) side.push(idx - 1);
           if (x < widthCells - 1 && grid[idx + 1] === EMPTY) side.push(idx + 1);
-          swap_any(idx, side);
+          swap_any(idx, side, swaps);
         }
         break;
       }
@@ -296,26 +346,32 @@
   // -----------------------------------------------------------
   function updateParticles() {
     let y = 0;
-    let x = 0;
+    let x;
+    let swaps = [];
     for (; y < heightCells; y+=2) {
+      x = 0;
       for (; x < widthCells; x+=2) {
-        updateParticlesInner(x, y)
+        updateParticlesInner(x, y, swaps)
       }
       x--;
       for (; x >= 0; x-=2) {
-        updateParticlesInner(x, y)
+        updateParticlesInner(x, y, swaps)
       }
     }
     y--;
     for (; y >= 0; y-=2) {
       x = 0;
       for (; x < widthCells; x+=2) {
-        updateParticlesInner(x, y)
+        updateParticlesInner(x, y, swaps)
       }
       x--;
       for (; x >= 0; x-=2) {
-        updateParticlesInner(x, y)
+        updateParticlesInner(x, y, swaps)
       }
+    }
+
+    for (const s of swaps) {
+      apply_swap(s[0], s[1]);
     }
   }
 
