@@ -6,7 +6,6 @@
   // CONFIGURATION & GLOBALS
   // -----------------------------------------------------------
   const CELL_SIZE = 8;
-  const STEAM_LIFETIME = 120;
 
   // ----- particle type IDs (named constants) -----
   const EMPTY = 0;
@@ -14,7 +13,9 @@
   const WATER = 2;
   const STONE = 3;
   const FIRE = 4;
-  const STEAM = 5;
+  const CLOUD1 = 5;
+  const CLOUD2 = 6;
+  const CLOUD3 = 7;
 
   const canvas = document.getElementById('world');
   const ctx = canvas.getContext('2d');
@@ -37,12 +38,14 @@
   let fps = 0;
 
   const PALETTE = [
-    [0, 0, 0, 0], // EMPTY – transparent
-    [194, 178, 128, 255],    // SAND
-    [74, 144, 226, 255],    // WATER
-    [85, 85, 85, 255],   // STONE
-    [255, 69, 0, 255],    // FIRE
-    [204, 204, 255, 180]     // STEAM (semi‑transparent)
+    [  0,   0,   0,   0], // EMPTY – transparent
+    [194, 178, 128, 255], // SAND
+    [ 74, 144, 226, 255], // WATER
+    [ 85,  85,  85, 255], // STONE
+    [255,  69,   0, 255], // FIRE
+    [204, 204, 255, 255], // CLOUD1
+    [140, 140, 200, 255], // CLOUD2
+    [ 80,  80, 140, 255]  // CLOUD3
   ];
 
   // -----------------------------------------------------------
@@ -63,7 +66,6 @@
     const idx = y * widthCells + x;
     if (idx < 0 || idx >= grid.length) return;
     grid[idx] = typeId;
-    //if (typeId === STEAM) lifeGrid[idx] = STEAM_LIFETIME;
   }
 
   function clearGrid() {
@@ -274,8 +276,8 @@
         for (const nIdx of neighbours) {
           if (nIdx < 0 || nIdx >= grid.length) continue;
           if (grid[nIdx] === WATER) {
-            grid[idx] = STEAM;
-            grid[nIdx] = STEAM;
+            grid[idx] = CLOUD1;
+            grid[nIdx] = CLOUD1;
             reacted = true;
             break;
           }
@@ -303,18 +305,54 @@
         break;
       }
 
-      case STEAM: {
+      case CLOUD1: {
+        const neighbours = [
+          idx - widthCells - 1, idx - widthCells, idx - widthCells + 1,
+          idx - 1,                                idx + 1,
+          idx + widthCells - 1, idx + widthCells, idx + widthCells + 1,
+        ];
+        let reacted = false;
+        //let adjacent_count = 0;
+        for (const nIdx of neighbours) {
+          if (nIdx < 0 || nIdx >= grid.length) continue;
+          if (grid[nIdx] === CLOUD1) {
+            //adjacent_count++;
+            if (Math.random() > 0.995) {
+              reacted = true;
+              break;
+            }
+          }
+        }
+
+        if (reacted) {
+          grid[idx] = CLOUD2;
+          for (const nIdx of neighbours) {
+            if (nIdx < 0 || nIdx >= grid.length) continue;
+            if (grid[nIdx] === CLOUD1) {
+              grid[nIdx] = EMPTY;
+              break;
+            }
+          }
+          break;
+        }
+
         const above = idx - widthCells;
         let try_side = false;
         if (above >= 0) {
-          if (grid[above] === EMPTY) {
+          if (grid[above] === EMPTY || grid[above] === FIRE || grid[above] === WATER) {
             // rise straight up
             swap(idx, above, swaps);
           } else {
             // try diagonal moves
             const diag = [];
-            if (x > 0 && grid[above - 1] === EMPTY) diag.push(above - 1);
-            if (x < widthCells - 1 && grid[above + 1] === EMPTY) diag.push(above + 1);
+            if (x > 0 && (
+               grid[above - 1] === EMPTY 
+               || grid[above] === FIRE 
+               || grid[above] === WATER)) diag.push(above - 1);
+            if (x < widthCells - 1 && (
+               grid[above + 1] === EMPTY 
+               || grid[above] === FIRE 
+               || grid[above] === WATER)) diag.push(above + 1);
             if (diag.length) {
               swap_any(idx, diag, swaps);
             } else {
@@ -325,11 +363,167 @@
           try_side = true;
         }
 
-        if (try_side) {
+        if (try_side && Math.random() > 0.95) {
           // try side moves
           const side = [];
           if (x > 0 && grid[idx - 1] === EMPTY) side.push(idx - 1);
           if (x < widthCells - 1 && grid[idx + 1] === EMPTY) side.push(idx + 1);
+          swap_any(idx, side, swaps);
+        }
+        break;
+      }
+
+      case CLOUD2: {
+        const neighbours = [
+          idx - widthCells - 1, idx - widthCells, idx - widthCells + 1,
+          idx - 1,                                idx + 1,
+          idx + widthCells - 1, idx + widthCells, idx + widthCells + 1,
+        ];
+        let reacted = false;
+        //let adjacent_count = 0;
+        for (const nIdx of neighbours) {
+          if (nIdx < 0 || nIdx >= grid.length) continue;
+          if (grid[nIdx] === CLOUD2) {
+            //adjacent_count++;
+            if (Math.random() > 0.995) {
+              reacted = true;
+              break;
+            }
+          }
+        }
+
+        if (reacted) {
+          grid[idx] = CLOUD3;
+          for (const nIdx of neighbours) {
+            if (nIdx < 0 || nIdx >= grid.length) continue;
+            if (grid[nIdx] === CLOUD2) {
+              grid[nIdx] = EMPTY;
+              break;
+            }
+          }
+          break;
+        }
+
+        const above = idx - widthCells;
+        let try_side = false;
+        if (above >= 0) {
+          if (grid[above] === EMPTY || grid[above] === FIRE || grid[above] === WATER) {
+            // rise straight up
+            swap(idx, above, swaps);
+          } else {
+            // try diagonal moves
+            const diag = [];
+            if (x > 0 && (
+               grid[above - 1] === EMPTY 
+               || grid[above] === FIRE 
+               || grid[above] === WATER)
+               ) diag.push(above - 1);
+            if (x < widthCells - 1 && (
+               grid[above + 1] === EMPTY 
+               || grid[above] === FIRE 
+               || grid[above] === WATER)
+               ) diag.push(above + 1);
+            if (diag.length) {
+              swap_any(idx, diag, swaps);
+            } else {
+              try_side = true;
+            }
+          }
+        } else {
+          try_side = true;
+        }
+
+        if (try_side && Math.random() > 0.95) {
+          // try side moves
+          const side = [];
+          if (x > 0 && (
+            grid[idx - 1] === EMPTY
+            || grid[idx - 1] === CLOUD1)
+            ) side.push(idx - 1);
+          if (x < widthCells - 1 
+             && (
+               grid[idx + 1] === EMPTY
+               || grid[idx + 1] === CLOUD1
+               )
+             ) side.push(idx + 1);
+          swap_any(idx, side, swaps);
+        }
+        break;
+      }
+
+      case CLOUD3: {
+        const neighbours = [
+          idx - widthCells - 1, idx - widthCells, idx - widthCells + 1,
+          idx - 1,                                idx + 1,
+          idx + widthCells - 1, idx + widthCells, idx + widthCells + 1,
+        ];
+        let reacted = false;
+        //let adjacent_count = 0;
+        for (const nIdx of neighbours) {
+          if (nIdx < 0 || nIdx >= grid.length) continue;
+          if (grid[nIdx] === CLOUD3) {
+            //adjacent_count++;
+            if (Math.random() > 0.995) {
+              reacted = true;
+              break;
+            }
+          }
+        }
+
+        if (reacted) {
+          grid[idx] = WATER;
+          for (const nIdx of neighbours) {
+            if (nIdx < 0 || nIdx >= grid.length) continue;
+            if (grid[nIdx] === CLOUD3) {
+              grid[nIdx] = EMPTY;
+              break;
+            }
+          }
+          break;
+        }
+
+        const above = idx - widthCells;
+        let try_side = false;
+        if (above >= 0) {
+          if (grid[above] === EMPTY || grid[above] === FIRE || grid[above] === WATER) {
+            // rise straight up
+            swap(idx, above, swaps);
+          } else {
+            // try diagonal moves
+            const diag = [];
+            if (x > 0 && (
+               grid[above - 1] === EMPTY 
+               || grid[above] === FIRE 
+               || grid[above] === WATER)
+               ) diag.push(above - 1);
+            if (x < widthCells - 1 && (
+               grid[above + 1] === EMPTY 
+               || grid[above] === FIRE 
+               || grid[above] === WATER)
+               ) diag.push(above + 1);
+            if (diag.length) {
+              swap_any(idx, diag, swaps);
+            } else {
+              try_side = true;
+            }
+          }
+        } else {
+          try_side = true;
+        }
+
+        if (try_side && Math.random() > 0.95) {
+          // try side moves
+          const side = [];
+          if (x > 0 && (
+            grid[idx - 1] === EMPTY
+            || grid[idx - 1] === CLOUD2)
+            ) side.push(idx - 1);
+          if (x < widthCells - 1 
+             && (
+               grid[idx + 1] === EMPTY
+               || grid[idx + 1] === CLOUD2
+               )
+             ) side.push(idx + 1);
           swap_any(idx, side, swaps);
         }
         break;
@@ -519,6 +713,9 @@
           break;
         case 'f':
           setActiveTool(FIRE);
+          break;
+        case 'c':
+          setActiveTool(CLOUD1);
           break;
         case 'e':
           setActiveTool(EMPTY);
