@@ -44,8 +44,8 @@
     [ 85,  85,  85, 255], // STONE
     [255,  69,   0, 255], // FIRE
     [204, 204, 255, 255], // CLOUD1
-    [140, 140, 200, 255], // CLOUD2
-    [ 80,  80, 140, 255]  // CLOUD3
+    [170, 170, 230, 255], // CLOUD2
+    [140, 140, 200, 255], // CLOUD3
   ];
 
   // -----------------------------------------------------------
@@ -317,7 +317,13 @@
           if (nIdx < 0 || nIdx >= grid.length) continue;
           if (grid[nIdx] === CLOUD1) {
             //adjacent_count++;
-            if (Math.random() > 0.995) {
+            if (Math.random() > 0.9999) {
+              reacted = true;
+              break;
+            }
+          } else if (grid[nIdx] === CLOUD2) {
+            //adjacent_count++;
+            if (Math.random() > 0.999) {
               reacted = true;
               break;
             }
@@ -363,7 +369,7 @@
           try_side = true;
         }
 
-        if (try_side && Math.random() > 0.95) {
+        if (try_side && Math.random() > 0.99) {
           // try side moves
           const side = [];
           if (x > 0 && grid[idx - 1] === EMPTY) side.push(idx - 1);
@@ -385,7 +391,13 @@
           if (nIdx < 0 || nIdx >= grid.length) continue;
           if (grid[nIdx] === CLOUD2) {
             //adjacent_count++;
-            if (Math.random() > 0.995) {
+            if (Math.random() > 0.9999) {
+              reacted = true;
+              break;
+            }
+          } else if (grid[nIdx] === CLOUD3) {
+            //adjacent_count++;
+            if (Math.random() > 0.999) {
               reacted = true;
               break;
             }
@@ -433,7 +445,7 @@
           try_side = true;
         }
 
-        if (try_side && Math.random() > 0.95) {
+        if (try_side && Math.random() > 0.99) {
           // try side moves
           const side = [];
           if (x > 0 && (
@@ -461,9 +473,9 @@
         //let adjacent_count = 0;
         for (const nIdx of neighbours) {
           if (nIdx < 0 || nIdx >= grid.length) continue;
-          if (grid[nIdx] === CLOUD3) {
+          if (grid[nIdx] === EMPTY) {
             //adjacent_count++;
-            if (Math.random() > 0.995) {
+            if (Math.random() > 0.95) {
               reacted = true;
               break;
             }
@@ -471,12 +483,14 @@
         }
 
         if (reacted) {
-          grid[idx] = WATER;
           for (const nIdx of neighbours) {
             if (nIdx < 0 || nIdx >= grid.length) continue;
-            if (grid[nIdx] === CLOUD3) {
-              grid[nIdx] = EMPTY;
-              break;
+            if (grid[nIdx] === EMPTY) {
+              grid[nIdx] = WATER;
+              if (Math.random() > 0.9) {
+                grid[idx] = WATER;
+                break;
+              }
             }
           }
           break;
@@ -511,7 +525,7 @@
           try_side = true;
         }
 
-        if (try_side && Math.random() > 0.95) {
+        if (try_side && Math.random() > 0.99) {
           // try side moves
           const side = [];
           if (x > 0 && (
