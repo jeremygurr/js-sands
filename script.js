@@ -741,7 +741,7 @@
           pauseBtn.setAttribute('aria-pressed', paused ? 'true' : 'false');
           e.preventDefault();
           break;
-        case 'c':
+        case '!':
           // clear
           clearGrid();
           renderFrame();
