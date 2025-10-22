@@ -817,6 +817,69 @@
   function addWoodTransformers() {
     const PASSABLE = EMPTY | WATER | CLOUD1 | CLOUD2 | CLOUD3;
     const SOLID = STONE | SAND;
+    const EWOOD = WOOD | EDGE;
+    addTransformerGroup([
+      [       // matcher of group
+        "wood absorb water",
+        0.05, // probability
+        [     // matcher matrix
+           ANY,  WATER,   ANY, 
+           ANY,   WOOD,   ANY,  
+           ANY,    ANY,   ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,  EMPTY,  SKIP,
+          SKIP,   SKIP,  SKIP,
+          SKIP,   SKIP,  SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "wood absorb water",
+        0.05, // probability
+        [     // matcher matrix
+           ANY,    ANY,   ANY,
+           ANY,   WOOD,   ANY,  
+           ANY,  WATER,   ANY, 
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,   SKIP,  SKIP,
+          SKIP,   SKIP,  SKIP,
+          SKIP,  EMPTY,  SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "wood absorb water",
+        0.05, // probability
+        [     // matcher matrix
+           ANY,    ANY,   ANY,
+         WATER,   WOOD,   ANY,  
+           ANY,    ANY,   ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,   SKIP,  SKIP,
+         EMPTY,   SKIP,  SKIP,
+          SKIP,   SKIP,  SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "wood absorb water",
+        0.05, // probability
+        [     // matcher matrix
+           ANY,    ANY,   ANY,
+           ANY,   WOOD, WATER,  
+           ANY,    ANY,   ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,   SKIP,  SKIP,
+          SKIP,   SKIP, EMPTY,
+          SKIP,   SKIP,  SKIP,
+        ],
+      ],
+    ]);
     addTransformerGroup([
       [       // matcher of group
         "wood down",
@@ -868,33 +931,201 @@
     ]);
     addTransformerGroup([
       [       // matcher of group
-        "wood grow diag",
-        1,    // probability
+        "wood grow diag long",
+        0.5,  // probability
         [     // matcher matrix
-             ~WOOD, ~WOOD,  ~WOOD, 
-             WATER, ~WOOD,  ~WOOD,  
-             ~WOOD,  WOOD,  ~WOOD,
+          ~WOOD, ~WOOD, ~WOOD,  ~WOOD, ~WOOD,
+          ~WOOD, ~WOOD, ~WOOD,  ~WOOD, ~WOOD,
+          ~WOOD, ~WOOD, WATER,  ~WOOD, ~WOOD,
+          ~WOOD,  WOOD, ~WOOD,  ~WOOD, ~WOOD,
+           WOOD, ~WOOD, ~WOOD,  ~WOOD, ~WOOD,
         ],
         CHANGE_TYPE_SET,
         [     // change matrix
-          SKIP,  SKIP,  SKIP,
-          WOOD,  SKIP,  SKIP,
-          SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  WOOD,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
         ],
       ],
       [       // matcher of group
-        "wood grow diag",
-        1,    // probability
+        "wood grow diag long",
+        0.5,  // probability
         [     // matcher matrix
-             ~WOOD, ~WOOD,  ~WOOD, 
-             ~WOOD, ~WOOD,  WATER,  
-             ~WOOD,  WOOD,  ~WOOD,
+          ~WOOD, ~WOOD, ~WOOD,  ~WOOD, ~WOOD,
+          ~WOOD, ~WOOD, ~WOOD,  ~WOOD, ~WOOD,
+          ~WOOD, ~WOOD, WATER,  ~WOOD, ~WOOD,
+          ~WOOD, ~WOOD, ~WOOD,   WOOD, ~WOOD,
+          ~WOOD, ~WOOD, ~WOOD,  ~WOOD,  WOOD,
         ],
         CHANGE_TYPE_SET,
         [     // change matrix
-          SKIP,  SKIP,  SKIP,
-          SKIP,  SKIP,  WOOD,
-          SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  WOOD,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+        ],
+      ],
+    ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "wood grow horiz long",
+        0.5,  // probability
+        [     // matcher matrix
+          ~WOOD,   ~WOOD,  ~WOOD,   ~WOOD,  ~WOOD,
+          ~WOOD,   ~WOOD,  ~WOOD,   ~WOOD,  ~WOOD,
+           WOOD,    WOOD,  WATER,   ~WOOD,  ~WOOD,
+          ~EWOOD, ~EWOOD, ~EWOOD,  ~EWOOD, ~EWOOD,
+          ~EWOOD, ~EWOOD, ~EWOOD,  ~EWOOD, ~EWOOD,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  WOOD,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "wood grow horiz long",
+        0.5,  // probability
+        [     // matcher matrix
+           ~WOOD,  ~WOOD,  ~WOOD,  ~WOOD,  ~WOOD,
+           ~WOOD,  ~WOOD,  ~WOOD,  ~WOOD,  ~WOOD,
+           ~WOOD,  ~WOOD,  WATER,   WOOD,   WOOD,
+          ~EWOOD, ~EWOOD, ~EWOOD, ~EWOOD, ~EWOOD,
+          ~EWOOD, ~EWOOD, ~EWOOD, ~EWOOD, ~EWOOD,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  WOOD,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+        ],
+      ],
+    ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "wood grow up long",
+        0.5,  // probability
+        [     // matcher matrix
+          ~WOOD, ~WOOD, ~WOOD,  ~WOOD, ~WOOD,
+          ~WOOD, ~WOOD, ~WOOD,  ~WOOD, ~WOOD,
+          ~WOOD, ~WOOD, WATER,  ~WOOD, ~WOOD,
+          ~WOOD, ~WOOD,  WOOD,  ~WOOD, ~WOOD,
+          ~WOOD, ~WOOD,  WOOD,  ~WOOD, ~WOOD,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  WOOD,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+        ],
+      ],
+    ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "wood grow diag branch",
+        0.2,  // probability
+        [     // matcher matrix
+          ~WOOD, ~WOOD, ~WOOD,  ~WOOD, ~WOOD,
+          ~WOOD, ~WOOD, ~WOOD,  ~WOOD, ~WOOD,
+          ~WOOD, ~WOOD, ~WOOD,  ~WOOD, ~WOOD,
+          ~WOOD, WATER, ~WOOD,  ~WOOD, ~WOOD,
+          ~WOOD, ~WOOD,  WOOD,    ANY,   ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  WOOD,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "wood grow diag branch",
+        0.2,  // probability
+        [     // matcher matrix
+          ~WOOD, ~WOOD, ~WOOD,  ~WOOD, ~WOOD,
+          ~WOOD, ~WOOD, ~WOOD,  ~WOOD, ~WOOD,
+          ~WOOD, ~WOOD, ~WOOD,  ~WOOD, ~WOOD,
+          ~WOOD, ~WOOD, ~WOOD,  WATER, ~WOOD,
+            ANY,   ANY,  WOOD,  ~WOOD, ~WOOD,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  WOOD,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+        ],
+      ],
+    ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "wood grow horiz branch",
+        0.2,  // probability
+        [     // matcher matrix
+          ~WOOD,  ~WOOD,  ~WOOD,  ~WOOD,   ANY,
+          ~WOOD,  ~WOOD,  ~WOOD,  ~WOOD,   ANY,
+          ~WOOD,  ~WOOD,  ~WOOD,  WATER,  WOOD,
+         ~EWOOD, ~EWOOD, ~EWOOD, ~EWOOD,   ANY,
+         ~EWOOD, ~EWOOD, ~EWOOD, ~EWOOD,   ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  WOOD,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "wood grow horiz branch",
+        0.2,  // probability
+        [     // matcher matrix
+           ANY,  ~WOOD,  ~WOOD,  ~WOOD,  ~WOOD, 
+           ANY,  ~WOOD,  ~WOOD,  ~WOOD,  ~WOOD, 
+          WOOD,  WATER,  ~WOOD,  ~WOOD,  ~WOOD, 
+           ANY, ~EWOOD, ~EWOOD, ~EWOOD, ~EWOOD, 
+           ANY, ~EWOOD, ~EWOOD, ~EWOOD, ~EWOOD, 
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  WOOD,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "wood grow up branch",
+        0.2,  // probability
+        [     // matcher matrix
+          ~WOOD, ~WOOD, ~WOOD,  ~WOOD, ~WOOD,
+          ~WOOD, ~WOOD, ~WOOD,  ~WOOD, ~WOOD,
+          ~WOOD, ~WOOD, ~WOOD,  ~WOOD, ~WOOD,
+          ~WOOD, ~WOOD, WATER,  ~WOOD, ~WOOD,
+            ANY,   ANY,  WOOD,    ANY,   ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  WOOD,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,  SKIP,  SKIP,
         ],
       ],
     ]);
@@ -902,13 +1133,12 @@
 
   function setupTransformers() {
     addSandTransformers();
-    addWaterTransformers();
     addLavaTransformers();
     addCloud1Transformers();
     addCloud2Transformers();
     addCloud3Transformers();
-    addWaterTransformers();
     addWoodTransformers();
+    addWaterTransformers();
   }
 
   let activeTool = SAND_VAL;   // default to sand
@@ -1081,7 +1311,7 @@
     return Math.floor(Math.random() * max_value);
   }
 
-  function matcher_matches(matcher, x, y, transform_name) {
+  function matcherMatches(matcher, x, y, transform_name) {
     const width = Math.sqrt(matcher.length);
 
     if (width != 1 && width != 3 && width != 5) {
@@ -1093,6 +1323,15 @@
 
     let result = true;
 
+    let center = x + y * widthCells;
+
+//    if (grid[center] == WATER_VAL 
+//      && grid[center+widthCells] == WOOD_VAL
+//      && transform_name.includes("grow up long")
+//      ) {
+//      console.log("Matching " + transform_name);
+//    }
+
     for (let iy = 0; iy < width; iy++) {
     for (let ix = 0; ix < width; ix++) {
 
@@ -1102,8 +1341,6 @@
       if (mustMatch == ANY) {
         continue;
       }
-
-      // console.log("matcher_matches: " + transform_name + " mustMatch=" + mustMatch);
 
       const mx = ix - radius;
       const my = iy - radius;
@@ -1127,6 +1364,13 @@
 
     }
     }
+        
+//    if (result 
+//      && transform_name.includes("grow up long") 
+//      && grid[center] == WATER_VAL 
+//      && grid[center+widthCells] == WOOD_VAL) {
+//      console.log("matcher matched: " + transform_name + " at " + x + ", " + y);
+//    }
 
     return result;
   }
@@ -1255,7 +1499,7 @@
       }
 
       if (probability == 1 || Math.random() < probability) {
-        if (matcher_matches(matcher, x, y, transform_name)) {
+        if (matcherMatches(matcher, x, y, transform_name)) {
           // console.log("Matched for " + transform_name);
           switch (change_type) {
             case CHANGE_TYPE_SET: {
