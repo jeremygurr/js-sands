@@ -254,9 +254,243 @@
     ]);
   }
 
+  function addLavaTransformers() {
+    addTransformerGroup([
+      [       // matcher of group
+        "lava water up/down",
+        1,    // probability
+        [     // matcher matrix
+            ANY,     ANY,    ANY, 
+            ANY,    LAVA,    ANY,  
+            ANY,   WATER,    ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+           SKIP,    SKIP,   SKIP,
+           SKIP,  CLOUD1,   SKIP,
+           SKIP,  CLOUD1,   SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "lava water up/down",
+        1,    // probability
+        [     // matcher matrix
+            ANY,   WATER,    ANY, 
+            ANY,    LAVA,    ANY,  
+            ANY,     ANY,    ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+           SKIP,  CLOUD1,   SKIP,
+           SKIP,  CLOUD1,   SKIP,
+           SKIP,    SKIP,   SKIP,
+        ],
+      ],
+    ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "lava water side",
+        1,    // probability
+        [     // matcher matrix
+            ANY,     ANY,    ANY, 
+          WATER,    LAVA,    ANY,  
+            ANY,     ANY,    ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+           SKIP,    SKIP,   SKIP,
+         CLOUD1,  CLOUD1,   SKIP,
+           SKIP,    SKIP,   SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "lava water side",
+        1,    // probability
+        [     // matcher matrix
+           ANY,     ANY,     ANY, 
+           ANY,    LAVA,   WATER,  
+           ANY,     ANY,     ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,    SKIP,    SKIP,
+          SKIP,  CLOUD1,  CLOUD1,
+          SKIP,    SKIP,    SKIP,
+        ],
+      ],
+    ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "lava down",
+        1,    // probability
+        [     // matcher matrix
+           ANY,   ANY,  ANY, 
+           ANY,  LAVA,  ANY,  
+           ANY, EMPTY,  ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,  SKIP, SKIP,
+          SKIP, EMPTY, SKIP,
+          SKIP,  LAVA, SKIP,
+        ],
+      ],
+    ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "lava diag",
+        1,    // probability
+        [     // matcher matrix
+           ANY,   ANY,  ANY, 
+           ANY,  LAVA,  ANY,  
+         EMPTY,   ANY,  ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,  SKIP, SKIP,
+          SKIP, EMPTY, SKIP,
+          LAVA,  SKIP, SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "lava diag",
+        1,    // probability
+        [     // matcher matrix
+           ANY,   ANY,   ANY, 
+           ANY,  LAVA,   ANY,  
+           ANY,   ANY, EMPTY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,  SKIP,  SKIP,
+          SKIP, EMPTY,  SKIP,
+          SKIP,  SKIP,  LAVA,
+        ],
+      ],
+    ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "lava side",
+        1,    // probability
+        [     // matcher matrix
+           ANY,   ANY,  ANY, 
+         EMPTY,  LAVA,  ANY,  
+           ANY,   ANY,  ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,  SKIP, SKIP,
+          LAVA, EMPTY, SKIP,
+          SKIP,  SKIP, SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "lava side",
+        1,    // probability
+        [     // matcher matrix
+           ANY,   ANY,   ANY, 
+           ANY,  LAVA, EMPTY,  
+           ANY,   ANY,   ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,  SKIP,  SKIP,
+          SKIP, EMPTY,  LAVA,
+          SKIP,  SKIP,  SKIP,
+        ],
+      ],
+    ]);
+  }
+
+  function addCloud1Transformers() {
+    addTransformerGroup([
+      [       // matcher of group
+        "cloud1 down",
+        1,    // probability
+        [     // matcher matrix
+           ANY,  EMPTY,  ANY,
+           ANY, CLOUD1,  ANY,  
+           ANY,    ANY,  ANY, 
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP, CLOUD1, SKIP,
+          SKIP,  EMPTY, SKIP,
+          SKIP,   SKIP, SKIP,
+        ],
+      ],
+    ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "cloud1 diag",
+        1,    // probability
+        [     // matcher matrix
+         EMPTY,    ANY,   ANY,
+           ANY, CLOUD1,   ANY,  
+           ANY,    ANY,   ANY, 
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+        CLOUD1,   SKIP,  SKIP,
+          SKIP,  EMPTY,  SKIP,
+          SKIP,   SKIP,  SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "cloud1 diag",
+        1,    // probability
+        [     // matcher matrix
+           ANY,    ANY,  EMPTY,
+           ANY, CLOUD1,    ANY,  
+           ANY,    ANY,    ANY, 
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,   SKIP, CLOUD1,
+          SKIP,  EMPTY,   SKIP,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+    ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "cloud1 side",
+        1,    // probability
+        [     // matcher matrix
+           ANY,    ANY,   ANY, 
+         EMPTY, CLOUD1,   ANY,  
+           ANY,    ANY,   ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,   SKIP,  SKIP,
+        CLOUD1,  EMPTY,  SKIP,
+          SKIP,   SKIP,  SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "cloud1 side",
+        1,    // probability
+        [     // matcher matrix
+           ANY,    ANY,    ANY, 
+           ANY, CLOUD1,  EMPTY,  
+           ANY,    ANY,    ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,   SKIP,   SKIP,
+          SKIP,  EMPTY, CLOUD1,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+    ]);
+  }
+
   function setupTransformers() {
     addSandTransformers();
     addWaterTransformers();
+    addLavaTransformers();
+    addCloud1Transformers();
   }
 
   let activeTool = SAND_VAL;   // default to sand
@@ -757,6 +991,9 @@
           break;
         case 'r':
           setActiveTool(STONE_VAL);
+          break;
+        case 'l':
+          setActiveTool(LAVA_VAL);
           break;
         case 'f':
           setActiveTool(FIRE_VAL);
