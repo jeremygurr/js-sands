@@ -778,6 +778,40 @@
         ],
       ],
     ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "cloud3 rain down",
+        0.001,// probability
+        [     // matcher matrix
+           ANY,    ANY,    ANY,
+           ANY, CLOUD3,    ANY,  
+         EMPTY,  EMPTY,  EMPTY, 
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,   SKIP,   SKIP,
+          SKIP,  EMPTY,   SKIP,
+         WATER,  WATER,  WATER,
+        ],
+      ],
+    ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "cloud3 rain down",
+        0.01, // probability
+        [     // matcher matrix
+           ANY,    ANY,    ANY,
+           ANY, CLOUD3,    ANY,  
+           ANY,  EMPTY,    ANY, 
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,   SKIP,   SKIP,
+          SKIP, CLOUD3,   SKIP,
+          SKIP,  WATER,   SKIP,
+        ],
+      ],
+    ]);
   }
 
   function setupTransformers() {
