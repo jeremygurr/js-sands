@@ -372,6 +372,9 @@
   function handleMousePainting() {
     if (paintOn) {
       paintAt(mousePos.x, mousePos.y, activeTool);
+      if (activeTool == STONE_VAL) {
+        paintOn = false;
+      }
     }
   }
 
