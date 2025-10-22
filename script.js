@@ -854,15 +854,61 @@
     // }
     grid[i] = typeId;
     if (brushSize > 1) {
+      i = idx - 1 - 1 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx + 1 + 1 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+    }
+    if (brushSize > 2) {
       i = idx - 2 - 2 * widthCells;
       if (inBounds(i, 0, grid.length)) grid[i] = typeId;
       i = idx + 2 + 2 * widthCells;
       if (inBounds(i, 0, grid.length)) grid[i] = typeId;
-    }
-    if (brushSize > 2) {
       i = idx - 2 + 2 * widthCells;
       if (inBounds(i, 0, grid.length)) grid[i] = typeId;
       i = idx + 2 - 2 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx - 2;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx + 2;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx + 2 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx - 2 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+    }
+    if (brushSize > 3) {
+      i = idx - 4 - 4 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx + 4 + 4 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx - 4 + 4 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx + 4 - 4 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx - 4;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx + 4;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx + 4 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx - 4 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx - 6 - 6 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx + 6 + 6 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx - 6 + 6 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx + 6 - 6 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx - 6;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx + 6;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx + 6 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx - 6 * widthCells;
       if (inBounds(i, 0, grid.length)) grid[i] = typeId;
     }
   }
@@ -1353,7 +1399,7 @@
         case '=':
           // increase brush size
           brushSize++;
-          if (brushSize > 3) brushSize = 3;
+          if (brushSize > 4) brushSize = 4;
           break;
         case '-':
           // decrease brush size
