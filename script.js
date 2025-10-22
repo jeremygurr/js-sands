@@ -643,18 +643,27 @@
     }
   }
 
+  let targetFPS = 30;
+  let lastFrameTime = 0;
+
   // -----------------------------------------------------------
   // MAIN LOOP
   // -----------------------------------------------------------
-  function tick() {
-    if (paused) {
-      requestAnimationFrame(tick);
-      return;
+  function tick(timestamp) {
+    let frameInterval = 1000 / targetFPS;
+    const elapsed = timestamp - lastFrameTime;
+
+    if (elapsed > frameInterval) {
+      lastFrameTime = timestamp - (elapsed % frameInterval);
+
+      if (!paused) {
+        handleMousePainting();
+        updateParticles();
+        renderFrame();
+        updateFps();
+      }
     }
-    handleMousePainting();
-    updateParticles();
-    renderFrame();
-    updateFps();
+    
     requestAnimationFrame(tick);
   }
 
@@ -780,6 +789,16 @@
           // decrease brush size
           brushSize--;
           if (brushSize < 1) brushSize = 1;
+          break;
+        case ',':
+          // decrease fps
+          targetFPS >>= 1;
+          if (targetFPS > 120) targetFPS=120;
+          break;
+        case '.':
+          // increase fps
+          targetFPS <<= 1;
+          if (targetFPS < 1) targetFPS=1;
           break;
         default:
           return;
