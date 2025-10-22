@@ -405,17 +405,17 @@
   function addCloud1Transformers() {
     addTransformerGroup([
       [       // matcher of group
-        "cloud1 down",
+        "cloud1 up",
         1,    // probability
         [     // matcher matrix
-           ANY,  EMPTY,  ANY,
-           ANY, CLOUD1,  ANY,  
-           ANY,    ANY,  ANY, 
+           ANY,  EMPTY | CLOUD2 | CLOUD3,  ANY,
+           ANY,                   CLOUD1,  ANY,  
+           ANY,                      ANY,  ANY, 
         ],
-        CHANGE_TYPE_SET,
+        CHANGE_TYPE_SWAP,
         [     // change matrix
-          SKIP, CLOUD1, SKIP,
-          SKIP,  EMPTY, SKIP,
+          SKIP,      4, SKIP,
+          SKIP,      1, SKIP,
           SKIP,   SKIP, SKIP,
         ],
       ],
@@ -425,14 +425,14 @@
         "cloud1 diag",
         1,    // probability
         [     // matcher matrix
-         EMPTY,    ANY,   ANY,
-           ANY, CLOUD1,   ANY,  
-           ANY,    ANY,   ANY, 
+         EMPTY | CLOUD2 | CLOUD3,    ANY,   ANY,
+                             ANY, CLOUD1,   ANY,  
+                             ANY,    ANY,   ANY, 
         ],
-        CHANGE_TYPE_SET,
+        CHANGE_TYPE_SWAP,
         [     // change matrix
-        CLOUD1,   SKIP,  SKIP,
-          SKIP,  EMPTY,  SKIP,
+             4,   SKIP,  SKIP,
+          SKIP,      0,  SKIP,
           SKIP,   SKIP,  SKIP,
         ],
       ],
@@ -440,14 +440,46 @@
         "cloud1 diag",
         1,    // probability
         [     // matcher matrix
-           ANY,    ANY,  EMPTY,
-           ANY, CLOUD1,    ANY,  
+           ANY,    ANY, EMPTY | CLOUD2 | CLOUD3,
+           ANY, CLOUD1,                     ANY,  
+           ANY,    ANY,                     ANY, 
+        ],
+        CHANGE_TYPE_SWAP,
+        [     // change matrix
+          SKIP,   SKIP,      4,
+          SKIP,      2,   SKIP,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+    ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "cloud1 side",
+        0.10, // probability
+        [     // matcher matrix
            ANY,    ANY,    ANY, 
+         EMPTY, CLOUD1,  EMPTY,  
+           ANY,    ANY,    ANY,
         ],
         CHANGE_TYPE_SET,
         [     // change matrix
-          SKIP,   SKIP, CLOUD1,
-          SKIP,  EMPTY,   SKIP,
+          SKIP,   SKIP,   SKIP,
+        CLOUD1,  EMPTY,   SKIP,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "cloud1 side",
+        0.10, // probability
+        [     // matcher matrix
+           ANY,    ANY,    ANY, 
+         EMPTY, CLOUD1,  EMPTY,  
+           ANY,    ANY,    ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,   SKIP,   SKIP,
+          SKIP,  EMPTY, CLOUD1,
           SKIP,   SKIP,   SKIP,
         ],
       ],
@@ -484,6 +516,268 @@
         ],
       ],
     ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "cloud1 condense side",
+        0.001,// probability
+        [     // matcher matrix
+           ANY,    ANY,    ANY, 
+        CLOUD1, CLOUD1, CLOUD1,  
+           ANY,    ANY,    ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,   SKIP,   SKIP,
+         EMPTY, CLOUD2,  EMPTY,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+    ]);
+  }
+
+  function addCloud2Transformers() {
+    addTransformerGroup([
+      [       // matcher of group
+        "cloud2 up",
+        1,    // probability
+        [     // matcher matrix
+           ANY, EMPTY | CLOUD3,  ANY,
+           ANY,         CLOUD2,  ANY,  
+           ANY,            ANY,  ANY, 
+        ],
+        CHANGE_TYPE_SWAP,
+        [     // change matrix
+          SKIP,      4, SKIP,
+          SKIP,      1, SKIP,
+          SKIP,   SKIP, SKIP,
+        ],
+      ],
+    ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "cloud2 diag",
+        1,    // probability
+        [     // matcher matrix
+         EMPTY | CLOUD3,    ANY,   ANY,
+                    ANY, CLOUD2,   ANY,  
+                    ANY,    ANY,   ANY, 
+        ],
+        CHANGE_TYPE_SWAP,
+        [     // change matrix
+             4,   SKIP,  SKIP,
+          SKIP,      0,  SKIP,
+          SKIP,   SKIP,  SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "cloud2 diag",
+        1,    // probability
+        [     // matcher matrix
+           ANY,    ANY,  EMPTY | CLOUD3,
+           ANY, CLOUD2,    ANY,  
+           ANY,    ANY,    ANY, 
+        ],
+        CHANGE_TYPE_SWAP,
+        [     // change matrix
+          SKIP,   SKIP,      4,
+          SKIP,      2,   SKIP,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+    ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "cloud2 side",
+        0.01, // probability
+        [     // matcher matrix
+                    ANY,    ANY,    ANY, 
+         EMPTY | CLOUD1, CLOUD2, CLOUD2,  
+                    ANY,    ANY,    ANY,
+        ],
+        CHANGE_TYPE_SWAP,
+        [     // change matrix
+          SKIP,   SKIP,   SKIP,
+             4,      3,   SKIP,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "cloud2 side",
+        0.01, // probability
+        [     // matcher matrix
+           ANY,    ANY,             ANY, 
+        CLOUD2, CLOUD2,  EMPTY | CLOUD1,  
+           ANY,    ANY,             ANY,
+        ],
+        CHANGE_TYPE_SWAP,
+        [     // change matrix
+          SKIP,   SKIP,   SKIP,
+          SKIP,      5,      4,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "cloud2 side",
+        0.10, // probability
+        [     // matcher matrix
+           ANY,             ANY,             ANY, 
+         EMPTY | CLOUD1, CLOUD2,  EMPTY | CLOUD1,  
+           ANY,             ANY,             ANY,
+        ],
+        CHANGE_TYPE_SWAP,
+        [     // change matrix
+          SKIP,   SKIP,   SKIP,
+          SKIP,      5,      4,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "cloud2 side",
+        0.10, // probability
+        [     // matcher matrix
+           ANY,             ANY,             ANY, 
+         EMPTY | CLOUD1, CLOUD2,  EMPTY | CLOUD1,  
+           ANY,             ANY,             ANY,
+        ],
+        CHANGE_TYPE_SWAP,
+        [     // change matrix
+          SKIP,   SKIP,   SKIP,
+             4,      3,   SKIP,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+    ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "cloud2 condense side",
+        0.001,// probability
+        [     // matcher matrix
+           ANY,    ANY,    ANY, 
+        CLOUD2, CLOUD2, CLOUD2,  
+           ANY,    ANY,    ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,   SKIP,   SKIP,
+         EMPTY, CLOUD3,  EMPTY,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+    ]);
+  }
+
+  function addCloud3Transformers() {
+    addTransformerGroup([
+      [       // matcher of group
+        "cloud3 up",
+        1,    // probability
+        [     // matcher matrix
+           ANY,  EMPTY,  ANY,
+           ANY, CLOUD3,  ANY,  
+           ANY,    ANY,  ANY, 
+        ],
+        CHANGE_TYPE_SWAP,
+        [     // change matrix
+          SKIP,      4, SKIP,
+          SKIP,      1, SKIP,
+          SKIP,   SKIP, SKIP,
+        ],
+      ],
+    ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "cloud3 diag",
+        1,    // probability
+        [     // matcher matrix
+         EMPTY,    ANY,   ANY,
+           ANY, CLOUD3,   ANY,  
+           ANY,    ANY,   ANY, 
+        ],
+        CHANGE_TYPE_SWAP,
+        [     // change matrix
+             4,   SKIP,  SKIP,
+          SKIP,      0,  SKIP,
+          SKIP,   SKIP,  SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "cloud3 diag",
+        1,    // probability
+        [     // matcher matrix
+           ANY,    ANY,  EMPTY,
+           ANY, CLOUD3,    ANY,  
+           ANY,    ANY,    ANY, 
+        ],
+        CHANGE_TYPE_SWAP,
+        [     // change matrix
+          SKIP,   SKIP,      4,
+          SKIP,      2,   SKIP,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+    ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "cloud3 side",
+        0.01, // probability
+        [     // matcher matrix
+                             ANY,    ANY,    ANY, 
+         EMPTY | CLOUD1 | CLOUD2, CLOUD3, CLOUD3,  
+                             ANY,    ANY,    ANY,
+        ],
+        CHANGE_TYPE_SWAP,
+        [     // change matrix
+          SKIP,   SKIP,   SKIP,
+             4,      3,   SKIP,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "cloud3 side",
+        0.01, // probability
+        [     // matcher matrix
+           ANY,    ANY,                     ANY, 
+        CLOUD3, CLOUD3, EMPTY | CLOUD1 | CLOUD2,  
+           ANY,    ANY,                     ANY,
+        ],
+        CHANGE_TYPE_SWAP,
+        [     // change matrix
+          SKIP,   SKIP,   SKIP,
+          SKIP,      5,      4,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "cloud3 side",
+        0.05, // probability
+        [     // matcher matrix
+                             ANY,    ANY,                     ANY, 
+         EMPTY | CLOUD1 | CLOUD2, CLOUD3, EMPTY | CLOUD1 | CLOUD2,  
+                             ANY,    ANY,                     ANY, 
+        ],
+        CHANGE_TYPE_SWAP,
+        [     // change matrix
+          SKIP,   SKIP,   SKIP,
+             4,      3,   SKIP,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "cloud3 side",
+        0.05, // probability
+        [     // matcher matrix
+                             ANY,    ANY,                     ANY, 
+         EMPTY | CLOUD1 | CLOUD2, CLOUD3, EMPTY | CLOUD1 | CLOUD2,  
+                             ANY,    ANY,                     ANY, 
+        ],
+        CHANGE_TYPE_SWAP,
+        [     // change matrix
+          SKIP,   SKIP,   SKIP,
+          SKIP,      5,      4,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+    ]);
   }
 
   function setupTransformers() {
@@ -491,6 +785,8 @@
     addWaterTransformers();
     addLavaTransformers();
     addCloud1Transformers();
+    addCloud2Transformers();
+    addCloud3Transformers();
   }
 
   let activeTool = SAND_VAL;   // default to sand
