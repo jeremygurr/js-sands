@@ -455,25 +455,25 @@
     addTransformerGroup([
       [       // matcher of group
         "cloud1 side",
-        1,    // probability
+        0.01, // probability
         [     // matcher matrix
-           ANY,    ANY,   ANY, 
-         EMPTY, CLOUD1,   ANY,  
-           ANY,    ANY,   ANY,
+           ANY,    ANY,    ANY, 
+         EMPTY, CLOUD1, CLOUD1,  
+           ANY,    ANY,    ANY,
         ],
         CHANGE_TYPE_SET,
         [     // change matrix
-          SKIP,   SKIP,  SKIP,
-        CLOUD1,  EMPTY,  SKIP,
-          SKIP,   SKIP,  SKIP,
+          SKIP,   SKIP,   SKIP,
+        CLOUD1,  EMPTY,   SKIP,
+          SKIP,   SKIP,   SKIP,
         ],
       ],
       [       // matcher of group
         "cloud1 side",
-        1,    // probability
+        0.01, // probability
         [     // matcher matrix
            ANY,    ANY,    ANY, 
-           ANY, CLOUD1,  EMPTY,  
+        CLOUD1, CLOUD1,  EMPTY,  
            ANY,    ANY,    ANY,
         ],
         CHANGE_TYPE_SET,
