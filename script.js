@@ -176,15 +176,15 @@
         "water down",
         1,    // probability
         [     // matcher matrix
-           ANY,   ANY,  ANY, 
-           ANY, WATER,  ANY,  
-           ANY, EMPTY,  ANY,
+           ANY,                              ANY,  ANY, 
+           ANY,                            WATER,  ANY,  
+           ANY, EMPTY | CLOUD1 | CLOUD2 | CLOUD3,  ANY,
         ],
-        CHANGE_TYPE_SET,
+        CHANGE_TYPE_SWAP,
         [     // change matrix
           SKIP,  SKIP, SKIP,
-          SKIP, EMPTY, SKIP,
-          SKIP, WATER, SKIP,
+          SKIP,     7, SKIP,
+          SKIP,     4, SKIP,
         ],
       ],
     ]);
@@ -193,30 +193,30 @@
         "water diag",
         1,    // probability
         [     // matcher matrix
-           ANY,   ANY,  ANY, 
-           ANY, WATER,  ANY,  
-         EMPTY,   ANY,  ANY,
+                                      ANY,   ANY,  ANY, 
+                                      ANY, WATER,  ANY,  
+         EMPTY | CLOUD1 | CLOUD2 | CLOUD3,   ANY,  ANY,
         ],
-        CHANGE_TYPE_SET,
+        CHANGE_TYPE_SWAP,
         [     // change matrix
           SKIP,  SKIP, SKIP,
-          SKIP, EMPTY, SKIP,
-         WATER,  SKIP, SKIP,
+          SKIP,     6, SKIP,
+             4,  SKIP, SKIP,
         ],
       ],
       [       // matcher of group
         "water diag",
         1,    // probability
         [     // matcher matrix
-           ANY,   ANY,   ANY, 
-           ANY, WATER,   ANY,  
-           ANY,   ANY, EMPTY,
+           ANY,   ANY,                              ANY, 
+           ANY, WATER,                              ANY,  
+           ANY,   ANY, EMPTY | CLOUD1 | CLOUD2 | CLOUD3,
         ],
-        CHANGE_TYPE_SET,
+        CHANGE_TYPE_SWAP,
         [     // change matrix
           SKIP,  SKIP,  SKIP,
-          SKIP, EMPTY,  SKIP,
-          SKIP,  SKIP, WATER,
+          SKIP,     8,  SKIP,
+          SKIP,  SKIP,     4,
         ],
       ],
     ]);
@@ -324,15 +324,15 @@
         "lava down",
         1,    // probability
         [     // matcher matrix
-           ANY,   ANY,  ANY, 
-           ANY,  LAVA,  ANY,  
-           ANY, EMPTY,  ANY,
+           ANY,                              ANY,  ANY, 
+           ANY,                             LAVA,  ANY,  
+           ANY, EMPTY | CLOUD1 | CLOUD2 | CLOUD3,  ANY,
         ],
-        CHANGE_TYPE_SET,
+        CHANGE_TYPE_SWAP,
         [     // change matrix
           SKIP,  SKIP, SKIP,
-          SKIP, EMPTY, SKIP,
-          SKIP,  LAVA, SKIP,
+          SKIP,     7, SKIP,
+          SKIP,     4, SKIP,
         ],
       ],
     ]);
@@ -341,30 +341,30 @@
         "lava diag",
         1,    // probability
         [     // matcher matrix
-           ANY,   ANY,  ANY, 
-           ANY,  LAVA,  ANY,  
-         EMPTY,   ANY,  ANY,
+                                      ANY,   ANY,  ANY, 
+                                      ANY,  LAVA,  ANY,  
+         EMPTY | CLOUD1 | CLOUD2 | CLOUD3,   ANY,  ANY,
         ],
-        CHANGE_TYPE_SET,
+        CHANGE_TYPE_SWAP,
         [     // change matrix
           SKIP,  SKIP, SKIP,
-          SKIP, EMPTY, SKIP,
-          LAVA,  SKIP, SKIP,
+          SKIP,     6, SKIP,
+             4,  SKIP, SKIP,
         ],
       ],
       [       // matcher of group
         "lava diag",
         1,    // probability
         [     // matcher matrix
-           ANY,   ANY,   ANY, 
-           ANY,  LAVA,   ANY,  
-           ANY,   ANY, EMPTY,
+           ANY,   ANY,                              ANY, 
+           ANY,  LAVA,                              ANY,  
+           ANY,   ANY, EMPTY | CLOUD1 | CLOUD2 | CLOUD3,
         ],
-        CHANGE_TYPE_SET,
+        CHANGE_TYPE_SWAP,
         [     // change matrix
           SKIP,  SKIP,  SKIP,
-          SKIP, EMPTY,  SKIP,
-          SKIP,  SKIP,  LAVA,
+          SKIP,     8,  SKIP,
+          SKIP,  SKIP,     4,
         ],
       ],
     ]);
