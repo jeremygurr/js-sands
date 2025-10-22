@@ -814,6 +814,92 @@
     ]);
   }
 
+  function addWoodTransformers() {
+    const PASSABLE = EMPTY | WATER | CLOUD1 | CLOUD2 | CLOUD3;
+    const SOLID = STONE | SAND;
+    addTransformerGroup([
+      [       // matcher of group
+        "wood down",
+        1,    // probability
+        [     // matcher matrix
+         ~WOOD,    ~WOOD, ~WOOD, 
+         ~WOOD,     WOOD, ~WOOD,  
+         ~WOOD, PASSABLE, ~WOOD,
+        ],
+        CHANGE_TYPE_SWAP,
+        [     // change matrix
+          SKIP,  SKIP,  SKIP,
+          SKIP,     7,  SKIP,
+          SKIP,     4,  SKIP,
+        ],
+      ],
+    ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "wood diag",
+        1,    // probability
+        [     // matcher matrix
+             ~WOOD, ~WOOD,  ~WOOD, 
+             ~WOOD,  WOOD,  ~WOOD,  
+          PASSABLE, SOLID,  ~WOOD,
+        ],
+        CHANGE_TYPE_SWAP,
+        [     // change matrix
+          SKIP,  SKIP,  SKIP,
+          SKIP,     6,  SKIP,
+             4,  SKIP,  SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "wood diag",
+        1,    // probability
+        [     // matcher matrix
+         ~WOOD, ~WOOD,    ~WOOD, 
+         ~WOOD,  WOOD,    ~WOOD,  
+         ~WOOD, SOLID, PASSABLE,
+        ],
+        CHANGE_TYPE_SWAP,
+        [     // change matrix
+          SKIP,  SKIP, SKIP,
+          SKIP,     8, SKIP,
+          SKIP,  SKIP,    4,
+        ],
+      ],
+    ]);
+    addTransformerGroup([
+      [       // matcher of group
+        "wood grow diag",
+        1,    // probability
+        [     // matcher matrix
+             ~WOOD, ~WOOD,  ~WOOD, 
+             WATER, ~WOOD,  ~WOOD,  
+             ~WOOD,  WOOD,  ~WOOD,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,  SKIP,  SKIP,
+          WOOD,  SKIP,  SKIP,
+          SKIP,  SKIP,  SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "wood grow diag",
+        1,    // probability
+        [     // matcher matrix
+             ~WOOD, ~WOOD,  ~WOOD, 
+             ~WOOD, ~WOOD,  WATER,  
+             ~WOOD,  WOOD,  ~WOOD,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,  SKIP,  SKIP,
+          SKIP,  SKIP,  WOOD,
+          SKIP,  SKIP,  SKIP,
+        ],
+      ],
+    ]);
+  }
+
   function setupTransformers() {
     addSandTransformers();
     addWaterTransformers();
@@ -821,6 +907,8 @@
     addCloud1Transformers();
     addCloud2Transformers();
     addCloud3Transformers();
+    addWaterTransformers();
+    addWoodTransformers();
   }
 
   let activeTool = SAND_VAL;   // default to sand
@@ -854,30 +942,12 @@
     // }
     grid[i] = typeId;
     if (brushSize > 1) {
-      i = idx - 1 - 1 * widthCells;
-      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
-      i = idx + 1 + 1 * widthCells;
-      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
-    }
-    if (brushSize > 2) {
       i = idx - 2 - 2 * widthCells;
       if (inBounds(i, 0, grid.length)) grid[i] = typeId;
       i = idx + 2 + 2 * widthCells;
       if (inBounds(i, 0, grid.length)) grid[i] = typeId;
-      i = idx - 2 + 2 * widthCells;
-      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
-      i = idx + 2 - 2 * widthCells;
-      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
-      i = idx - 2;
-      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
-      i = idx + 2;
-      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
-      i = idx + 2 * widthCells;
-      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
-      i = idx - 2 * widthCells;
-      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
     }
-    if (brushSize > 3) {
+    if (brushSize > 2) {
       i = idx - 4 - 4 * widthCells;
       if (inBounds(i, 0, grid.length)) grid[i] = typeId;
       i = idx + 4 + 4 * widthCells;
@@ -894,6 +964,8 @@
       if (inBounds(i, 0, grid.length)) grid[i] = typeId;
       i = idx - 4 * widthCells;
       if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+    }
+    if (brushSize > 3) {
       i = idx - 6 - 6 * widthCells;
       if (inBounds(i, 0, grid.length)) grid[i] = typeId;
       i = idx + 6 + 6 * widthCells;
@@ -909,6 +981,22 @@
       i = idx + 6 * widthCells;
       if (inBounds(i, 0, grid.length)) grid[i] = typeId;
       i = idx - 6 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx - 8 - 8 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx + 8 + 8 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx - 8 + 8 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx + 8 - 8 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx - 8;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx + 8;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx + 8 * widthCells;
+      if (inBounds(i, 0, grid.length)) grid[i] = typeId;
+      i = idx - 8 * widthCells;
       if (inBounds(i, 0, grid.length)) grid[i] = typeId;
     }
   }
@@ -993,7 +1081,7 @@
     return Math.floor(Math.random() * max_value);
   }
 
-  function matcher_matches(matcher, x, y) {
+  function matcher_matches(matcher, x, y, transform_name) {
     const width = Math.sqrt(matcher.length);
 
     if (width != 1 && width != 3 && width != 5) {
@@ -1014,6 +1102,8 @@
       if (mustMatch == ANY) {
         continue;
       }
+
+      // console.log("matcher_matches: " + transform_name + " mustMatch=" + mustMatch);
 
       const mx = ix - radius;
       const my = iy - radius;
@@ -1165,7 +1255,7 @@
       }
 
       if (probability == 1 || Math.random() < probability) {
-        if (matcher_matches(matcher, x, y)) {
+        if (matcher_matches(matcher, x, y, transform_name)) {
           // console.log("Matched for " + transform_name);
           switch (change_type) {
             case CHANGE_TYPE_SET: {
@@ -1312,6 +1402,7 @@
     // ----- pause button -----
     pauseBtn.addEventListener('click', function () {
       paused = !paused;
+      if (paused) fpsDisplay.textContent = `-- FPS`;
       this.classList.toggle('paused');
       this.setAttribute('aria-pressed', paused ? 'true' : 'false');
     });
@@ -1386,6 +1477,7 @@
         case ' ':
           // space → pause
           paused = !paused;
+          if (paused) fpsDisplay.textContent = `-- FPS`;
           pauseBtn.classList.toggle('paused');
           pauseBtn.setAttribute('aria-pressed', paused ? 'true' : 'false');
           e.preventDefault();
