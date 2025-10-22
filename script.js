@@ -50,26 +50,26 @@
   const FIRE2_VAL     = 16;
   const FIRE3_VAL     = 17;
 
-  const EDGE      = 1 << EDGE_VAL;
-  const EMPTY     = 1 << EMPTY_VAL;
-  const SAND      = 1 << SAND_VAL;
-  const WATER     = 1 << WATER_VAL;
-  const STONE     = 1 << STONE_VAL;
-  const LAVA      = 1 << LAVA_VAL;
-  const CLOUD1    = 1 << CLOUD1_VAL;
-  const CLOUD2    = 1 << CLOUD2_VAL;
-  const CLOUD3    = 1 << CLOUD3_VAL;
-  const WOOD      = 1 << WOOD_VAL;
-  const HOTWOOD1  = 1 << HOTWOOD1_VAL;
-  const HOTWOOD2  = 1 << HOTWOOD2_VAL;
-  const EMBER     = 1 << EMBER_VAL;
-  const CHAR      = 1 << CHAR_VAL;
-  const ASH       = 1 << ASH_VAL;
-  const FIRE      = 1 << FIRE_VAL;
-  const FIRE2     = 1 << FIRE2_VAL;
-  const FIRE3     = 1 << FIRE3_VAL;
-  const ANY       = -1;
-  const SKIP      = -1; // used in a different context than ANY, so it takes on a different meaning
+  const EDGE      = 1n << BigInt(EDGE_VAL);
+  const EMPTY     = 1n << BigInt(EMPTY_VAL);
+  const SAND      = 1n << BigInt(SAND_VAL);
+  const WATER     = 1n << BigInt(WATER_VAL);
+  const STONE     = 1n << BigInt(STONE_VAL);
+  const LAVA      = 1n << BigInt(LAVA_VAL);
+  const CLOUD1    = 1n << BigInt(CLOUD1_VAL);
+  const CLOUD2    = 1n << BigInt(CLOUD2_VAL);
+  const CLOUD3    = 1n << BigInt(CLOUD3_VAL);
+  const WOOD      = 1n << BigInt(WOOD_VAL);
+  const HOTWOOD1  = 1n << BigInt(HOTWOOD1_VAL);
+  const HOTWOOD2  = 1n << BigInt(HOTWOOD2_VAL);
+  const EMBER     = 1n << BigInt(EMBER_VAL);
+  const CHAR      = 1n << BigInt(CHAR_VAL);
+  const ASH       = 1n << BigInt(ASH_VAL);
+  const FIRE      = 1n << BigInt(FIRE_VAL);
+  const FIRE2     = 1n << BigInt(FIRE2_VAL);
+  const FIRE3     = 1n << BigInt(FIRE3_VAL);
+  const ANY       = -1n;
+  const SKIP      = -1n; // used in a different context than ANY, so it takes on a different meaning
 
   const PALETTE = [
     [  0,   0,   0, 255], // EDGE (placeholder)
@@ -121,6 +121,7 @@
   function addSandTransformers() {
     addTransformerGroup([
       [       // matcher of group
+        "sand down",
         1,    // probability
         [     // matcher matrix
            ANY,           ANY,  ANY, 
@@ -137,6 +138,7 @@
     ]);
     addTransformerGroup([
       [       // matcher of group
+        "sand diag",
         1,    // probability
         [     // matcher matrix
                     ANY,   ANY,  ANY, 
@@ -151,6 +153,7 @@
         ],
       ],
       [       // matcher of group
+        "sand diag",
         1,    // probability
         [     // matcher matrix
            ANY,   ANY,           ANY, 
@@ -169,23 +172,25 @@
 
   function addWaterTransformers() {
     addTransformerGroup([
-    [       // matcher of group
-      1,    // probability
-      [     // matcher matrix
-         ANY,   ANY,  ANY, 
-         ANY, WATER,  ANY,  
-         ANY, EMPTY,  ANY,
+      [       // matcher of group
+        "water down",
+        1,    // probability
+        [     // matcher matrix
+           ANY,   ANY,  ANY, 
+           ANY, WATER,  ANY,  
+           ANY, EMPTY,  ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,  SKIP, SKIP,
+          SKIP, EMPTY, SKIP,
+          SKIP, WATER, SKIP,
+        ],
       ],
-      CHANGE_TYPE_SWAP,
-      [     // change matrix
-        SKIP,  SKIP, SKIP,
-        SKIP, EMPTY, SKIP,
-        SKIP, WATER, SKIP,
-      ],
-    ],
     ]);
     addTransformerGroup([
       [       // matcher of group
+        "water diag",
         1,    // probability
         [     // matcher matrix
            ANY,   ANY,  ANY, 
@@ -200,6 +205,7 @@
         ],
       ],
       [       // matcher of group
+        "water diag",
         1,    // probability
         [     // matcher matrix
            ANY,   ANY,   ANY, 
@@ -216,6 +222,7 @@
     ]);
     addTransformerGroup([
       [       // matcher of group
+        "water side",
         1,    // probability
         [     // matcher matrix
            ANY,   ANY,  ANY, 
@@ -230,6 +237,7 @@
         ],
       ],
       [       // matcher of group
+        "water side",
         1,    // probability
         [     // matcher matrix
            ANY,   ANY,   ANY, 
@@ -277,6 +285,9 @@
     if (idx < 0 || idx >= grid.length || paintDelay > 0) return;
     paintDelay = 3;
     let i=idx
+    // if (i != 0 && i != 1) {
+    //   console.log("paintAt: grid[" + i + "]=" + typeId);
+    // }
     grid[i] = typeId;
     if (brushSize > 1) {
       i = idx - 2 - 2 * widthCells;
@@ -307,8 +318,6 @@
     heightCells = Math.floor(height / CELL_SIZE);
 
     const newGrid = new Uint8Array(widthCells * heightCells);
-    const newLifeGrid = new Uint16Array(widthCells * heightCells);
-    const newMomentum = new Int8Array(widthCells * heightCells);
 
     for (let y = 0; y < heightCells; y++) {
       for (let x = 0; x < widthCells; x++) {
@@ -366,22 +375,9 @@
     }
   }
 
-  function apply_swap(a, b) {
-    [grid[a], grid[b]] = [grid[b], grid[a]];
-  }
-
-  function apply_set(index, particle) {
-    grid[index] = particle;
-  }
-
   // returns random integer over this interval: [0..max_value)
   function randInt(max_value) {
     return Math.floor(Math.random() * max_value);
-  }
-
-  function choose(arr) {
-    const randomIndex = Math.floor(Math.random() * arr.length);
-    return arr[randomIndex];
   }
 
   function matcher_matches(matcher, x, y) {
@@ -416,7 +412,7 @@
       let realField;
       if (inBounds(ri, 0, grid.length)) {
         realParticle = grid[ri];
-        realField = 1 << realParticle;
+        realField = 1n << BigInt(realParticle);
       } else {
         realField = EDGE;
       }
@@ -434,6 +430,7 @@
   
   function applySwapChanger(changer, x, y, changeGrid, width) {
     const radius = Math.floor((width - 1) / 2);
+    let results = [];
 
     for (let iy = 0; iy < width; iy++) {
     for (let ix = 0; ix < width; ix++) {
@@ -466,7 +463,9 @@
 
       let real;
       if (inBounds(ri, 0, grid.length)) {
-        grid[ri] = sourceParticle;
+        // console.log("Swapping type " + sourceParticle + " from " + absI + " to " + ri + "(" + grid[ri] + ")");
+        results.push(ri);
+        results.push(sourceParticle);
         changeGrid[ri] = 1;
       } else {
         console.error("Changer is trying to change an out of bounds location: " + ix + ", " + iy);
@@ -474,10 +473,36 @@
 
     }
     }
+
+    for (let i = 0; i < results.length; i += 2) {
+      // console.log("applySwapChanger: grid[" + results[i] + "]=" + results[i+1]);
+      grid[results[i]] = results[i+1];
+    }
+  }
+
+  /**
+   * Counts the leading zeros for a BigInt value interpreted as a 64-bit unsigned integer.
+   * @param {bigint} n - The 64-bit BigInt value.
+   * @returns {number} The count of leading zeros (0 to 64).
+   */
+  function clz64(n) {
+    // 1. Check the high 32 bits (shift right by 32)
+    const high32 = Number(n >> 32n);
+
+    if (high32 !== 0) {
+      // The first '1' is in the high 32 bits.
+      // Math.clz32() counts leading zeros in the high 32 bits.
+      return Math.clz32(high32);
+    } else {
+      // The high 32 bits are all zero.
+      // We have 32 zeros from the high part, plus the leading zeros in the low part.
+      const low32 = Number(n & 0xFFFFFFFFn);
+      return 32 + Math.clz32(low32);
+    }
   }
 
   function applySetChanger(changer, x, y, changeGrid, width) {
-    const radius = Math.floor((width - 1) / 2);
+    const radius = Math.trunc((width - 1) / 2);
 
     for (let iy = 0; iy < width; iy++) {
     for (let ix = 0; ix < width; ix++) {
@@ -489,7 +514,8 @@
         continue;
       }
 
-      const changeToParticle = 63 - Math.clz32(changeToField);
+      const changeToParticle = 63 - clz64(changeToField);
+      // console.log("changeToField: " + changeToField + "  changeToParticle: " + changeToParticle);
       const mx = ix - radius;
       const my = iy - radius;
       const rx = mx + x;
@@ -498,6 +524,7 @@
 
       let real;
       if (inBounds(ri, 0, grid.length)) {
+        // console.log("applySetChanger: grid[" + ri + "]=" + changeToParticle);
         grid[ri] = changeToParticle;
         changeGrid[ri] = 1;
       } else {
@@ -515,7 +542,7 @@
         transformer = group[randInt(group.length)];
       }
 
-      const [probability, matcher, change_type, changer] = transformer;
+      const [transform_name, probability, matcher, change_type, changer] = transformer;
 
       const width = Math.sqrt(matcher.length);
 
@@ -526,6 +553,7 @@
 
       if (probability == 1 || Math.random() < probability) {
         if (matcher_matches(matcher, x, y)) {
+          // console.log("Matched for " + transform_name);
           switch (change_type) {
             case CHANGE_TYPE_SET: {
               applySetChanger(changer, x, y, changeGrid, width);
@@ -565,27 +593,6 @@
       }
     }
 
-    //let delayed_actions = [];
-
-    // for (let y of ys) {
-    //   for (let x of xs) {
-    //     updateParticlesInner(x, y, delayed_actions)
-    //     const idx = y * widthCells + x;
-    //     const type = grid[idx];
-    //   }
-    // }
-
-    // for (let s of delayed_actions) {
-    //   switch (s[0]) {
-    //     case ACTION_SET:
-    //       apply_set(s[1], s[2]);
-    //       break;
-    //     case ACTION_SWAP:
-    //       apply_swap(s[1], s[2]);
-    //       break;
-    //   }
-    // }
-
     if (paintDelay > 0) paintDelay--;
 
   }
@@ -601,6 +608,9 @@
       for (let x = 0; x < widthCells; x++) {
         const idx = y * widthCells + x;
         const type = grid[idx];
+        // if (type != 0 && type != 1) {
+        //   console.log("PALETTE[" + type + "]");
+        // }
         const [r, g, b, a] = PALETTE[type];
         const pixelStart = (y * CELL_SIZE * canvas.width + x * CELL_SIZE) * 4;
 
