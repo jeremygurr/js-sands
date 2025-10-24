@@ -46,7 +46,7 @@
   const EMBER_VAL     = 12;
   const CHAR_VAL      = 13;
   const ASH_VAL       = 14;
-  const FIRE_VAL      = 15;
+  const FIRE1_VAL     = 15;
   const FIRE2_VAL     = 16;
   const FIRE3_VAL     = 17;
 
@@ -65,7 +65,7 @@
   const EMBER     = 1n << BigInt(EMBER_VAL);
   const CHAR      = 1n << BigInt(CHAR_VAL);
   const ASH       = 1n << BigInt(ASH_VAL);
-  const FIRE      = 1n << BigInt(FIRE_VAL);
+  const FIRE1     = 1n << BigInt(FIRE1_VAL);
   const FIRE2     = 1n << BigInt(FIRE2_VAL);
   const FIRE3     = 1n << BigInt(FIRE3_VAL);
   const ANY       = -1n;
@@ -82,12 +82,12 @@
     [170, 170, 230, 255], // CLOUD2
     [140, 140, 200, 255], // CLOUD3
     [124,  68,  58, 255], // WOOD
-    [124,  68,  58, 255], // HOTWOOD1
-    [124,  68,  58, 255], // HOTWOOD2
-    [224, 120,   0, 255], // EMBER
+    [164,  68,  58, 255], // HOTWOOD1
+    [204, 108,  58, 255], // HOTWOOD2
+    [234, 140,   0, 255], // EMBER
     [ 60,  30,  30, 255], // CHAR
     [140, 140, 140, 255], // ASH
-    [164, 120,   0, 255], // FIRE
+    [164, 120,   0, 255], // FIRE1
     [160,  68,   0, 255], // FIRE2
     [160,  20,   0, 255], // FIRE3
   ];
@@ -111,8 +111,8 @@
 //   if a transform is applied, skip all pixels it could have affected: next_x next_y
 
   const transformers = [];
-  const CHANGE_TYPE_SWAP = 0;
-  const CHANGE_TYPE_SET  = 1;
+  const CHANGE_TYPE_SWAP   = 0;
+  const CHANGE_TYPE_SET    = 1;
 
   function addTransformerGroup(array) {
     transformers.push(array);
