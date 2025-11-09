@@ -814,10 +814,73 @@
     ]);
   }
 
-  function addWoodTransformers() {
+function addWoodTransformers() {
     const PASSABLE = EMPTY | WATER | CLOUD1 | CLOUD2 | CLOUD3;
     const SOLID = STONE | SAND;
     const EWOOD = WOOD | EDGE;
+    // Lava ignites wood
+    addTransformerGroup([
+      [       // matcher of group
+        "lava ignites wood",
+        1,    // probability
+        [     // matcher matrix
+           ANY,   LAVA,    ANY, 
+           ANY,   WOOD,    ANY,  
+           ANY,    ANY,    ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,   SKIP,   SKIP,
+          SKIP, FIRE1,    SKIP,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "lava ignites wood",
+        1,    // probability
+        [     // matcher matrix
+           ANY,    ANY,    ANY, 
+           ANY,   WOOD,    ANY,  
+           ANY,   LAVA,    ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,   SKIP,   SKIP,
+          SKIP, FIRE1,    SKIP,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "lava ignites wood",
+        1,    // probability
+        [     // matcher matrix
+           ANY,    ANY,    ANY, 
+          LAVA,   WOOD,    ANY,  
+           ANY,    ANY,    ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,   SKIP,   SKIP,
+          SKIP, FIRE1,    SKIP,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+      [       // matcher of group
+        "lava ignites wood",
+        1,    // probability
+        [     // matcher matrix
+           ANY,    ANY,    ANY, 
+           ANY,   WOOD,   LAVA,  
+           ANY,    ANY,    ANY,
+        ],
+        CHANGE_TYPE_SET,
+        [     // change matrix
+          SKIP,   SKIP,   SKIP,
+          SKIP, FIRE1,    SKIP,
+          SKIP,   SKIP,   SKIP,
+        ],
+      ],
+    ]);
     addTransformerGroup([
       [       // matcher of group
         "wood absorb water",
